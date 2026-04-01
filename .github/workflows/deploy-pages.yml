@@ -6,16 +6,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: gh-pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +25,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-
-      - name: Configurar Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Instalar dependencias
         run: npm ci
@@ -45,19 +38,10 @@ jobs:
       - name: Fallback para rotas SPA
         run: cp dist/gestor/browser/index.html dist/gestor/browser/404.html
 
-      - name: Publicar artefato Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Publicar na branch gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist/gestor/browser
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy no GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: dist/gestor/browser
+          force_orphan: true
