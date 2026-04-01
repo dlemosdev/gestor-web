@@ -1,0 +1,56 @@
+:root {
+  --fonte-primaria: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+
+  color-scheme: light;
+
+  --cor-fundo-rgb: 247 249 252;
+  --cor-superficie-rgb: 255 255 255;
+  --cor-superficie-secundaria-rgb: 244 247 251;
+  --cor-borda-rgb: 219 227 239;
+  --cor-primaria-rgb: 37 99 235;
+  --cor-primaria-hover-rgb: 29 78 216;
+  --cor-texto-rgb: 15 23 42;
+  --cor-texto-secundaria-rgb: 71 85 105;
+  --cor-campo-fundo-rgb: 255 255 255;
+  --cor-campo-borda-rgb: 219 227 239;
+  --cor-campo-placeholder-rgb: 148 163 184;
+  --cor-campo-foco-rgb: 59 130 246;
+
+  --espacamento-1: 0.25rem;
+  --espacamento-2: 0.5rem;
+  --espacamento-3: 0.75rem;
+  --espacamento-4: 1rem;
+  --espacamento-5: 1.25rem;
+  --espacamento-6: 1.5rem;
+  --espacamento-8: 2rem;
+
+  --raio-sm: 0.5rem;
+  --raio-md: 0.75rem;
+  --raio-lg: 1rem;
+  --raio-xl: 1.25rem;
+
+  --sombra-suave: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --sombra-card: 0 2px 10px rgba(15, 23, 42, 0.06);
+
+  --cor-prioridade-baixa: #64748b;
+  --cor-prioridade-media: #2563eb;
+  --cor-prioridade-alta: #d97706;
+  --cor-prioridade-critica: #dc2626;
+}
+
+html.tema-escuro {
+  color-scheme: dark;
+
+  --cor-fundo-rgb: 9 11 23;
+  --cor-superficie-rgb: 16 18 34;
+  --cor-superficie-secundaria-rgb: 24 27 46;
+  --cor-borda-rgb: 44 49 74;
+  --cor-primaria-rgb: 139 92 246;
+  --cor-primaria-hover-rgb: 124 58 237;
+  --cor-texto-rgb: 238 242 255;
+  --cor-texto-secundaria-rgb: 159 168 193;
+  --cor-campo-fundo-rgb: 12 16 32;
+  --cor-campo-borda-rgb: 39 45 72;
+  --cor-campo-placeholder-rgb: 106 116 148;
+  --cor-campo-foco-rgb: 139 92 246;
+}

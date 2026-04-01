@@ -1,0 +1,7 @@
+﻿export enum StatusAtividade {
+  BACKLOG = 'BACKLOG',
+  EM_ANDAMENTO = 'EM_ANDAMENTO',
+  BLOQUEADA = 'BLOQUEADA',
+  CONCLUIDA = 'CONCLUIDA',
+}
+

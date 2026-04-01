@@ -1,0 +1,95 @@
+﻿import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+
+import { Atividade } from '../../../../models/atividade.model';
+import { Raia } from '../../../../models/raia.model';
+import { EstadoVazioUiComponent } from '../../../../shared/ui/estado-vazio/estado-vazio-ui.component';
+import { EventoSoltarAtividade, RaiaColunaComponent } from '../raia-coluna/raia-coluna.component';
+
+export interface RaiaComAtividades {
+  raia: Raia;
+  atividades: Atividade[];
+}
+
+@Component({
+  selector: 'app-quadro-raias',
+  standalone: true,
+  imports: [DragDropModule, EstadoVazioUiComponent, RaiaColunaComponent],
+  host: {
+    class: 'block h-full min-h-0',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (raiasComAtividades().length === 0) {
+      <app-estado-vazio-ui
+        titulo="Nenhuma raia criada"
+        descricao="Crie a primeira raia para começar o fluxo do projeto."
+        textoAcao="Criar primeira raia"
+        (acaoPrimaria)="solicitarCriacaoRaia.emit()"
+      />
+    } @else {
+      <section class="flex h-full min-h-0 flex-col pt-2" aria-label="Quadro de raias">
+        <div
+          class="lista-raias flex h-full min-h-0 flex-1 items-stretch gap-5 overflow-x-auto overflow-y-hidden px-2 pb-0 snap-x snap-proximity"
+          cdkDropList
+          cdkDropListOrientation="horizontal"
+          [cdkDropListAutoScrollStep]="24"
+          [cdkDropListData]="raiasComAtividades()"
+          (cdkDropListDropped)="reordenarRaias($event)"
+          aria-label="Lista horizontal de raias"
+        >
+          @for (item of raiasComAtividades(); track item.raia.id) {
+            <div cdkDrag cdkDragLockAxis="x" class="relative h-full snap-start flex-none pb-2">
+              <app-raia-coluna
+                [raia]="item.raia"
+                [atividades]="item.atividades"
+                [idsConectados]="idsDropList()"
+                [arrastarDesabilitado]="arrastarDesabilitado()"
+                (editarNomeRaia)="editarNomeRaia.emit($event)"
+                (excluirRaia)="excluirRaia.emit($event)"
+                (excluirAtividade)="excluirAtividade.emit($event)"
+                (abrirDetalhesAtividade)="abrirDetalhesAtividade.emit($event)"
+                (soltar)="soltarAtividade.emit($event)"
+              />
+            </div>
+          }
+        </div>
+      </section>
+    }
+  `,
+  styles: `
+    .lista-raias {
+      scroll-behavior: smooth;
+      scroll-padding-left: 0.5rem;
+      scroll-padding-right: 0.5rem;
+    }
+
+    .lista-raias.cdk-drop-list-dragging > div:not(.cdk-drag-placeholder) {
+      transition: transform 150ms cubic-bezier(0.2, 0, 0, 1);
+    }
+  `,
+})
+export class QuadroRaiasComponent {
+  readonly raiasComAtividades = input<RaiaComAtividades[]>([]);
+  readonly arrastarDesabilitado = input(false);
+
+  readonly solicitarCriacaoRaia = output<void>();
+  readonly editarNomeRaia = output<{ raiaId: string; nome: string }>();
+  readonly excluirRaia = output<Raia>();
+  readonly excluirAtividade = output<string>();
+  readonly abrirDetalhesAtividade = output<Atividade>();
+  readonly soltarAtividade = output<EventoSoltarAtividade>();
+  readonly moverRaia = output<RaiaComAtividades[]>();
+
+  readonly idsDropList = computed(() => this.raiasComAtividades().map((item) => `raia-drop-${item.raia.id}`));
+
+  reordenarRaias(evento: CdkDragDrop<RaiaComAtividades[]>): void {
+    if (evento.previousIndex === evento.currentIndex) {
+      return;
+    }
+
+    const lista = [...this.raiasComAtividades()];
+    moveItemInArray(lista, evento.previousIndex, evento.currentIndex);
+    this.moverRaia.emit(lista);
+  }
+}
