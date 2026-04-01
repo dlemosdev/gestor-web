@@ -16,7 +16,7 @@ export interface OpcaoSeletorUi {
       }
 
       <select
-        class="h-10 rounded-xl border border-borda bg-superficie px-3 text-sm text-cor-texto outline-none transition focus:border-primaria focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+        class="h-11 rounded-xl border border-borda bg-superficie px-3.5 text-sm text-cor-texto outline-none transition focus:border-primaria focus:ring-2 focus:ring-primaria/20 disabled:cursor-not-allowed disabled:opacity-70"
         [disabled]="desabilitado()"
         [attr.aria-label]="ariaLabel() || rotulo()"
       >

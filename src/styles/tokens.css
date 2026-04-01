@@ -1,20 +1,41 @@
 :root {
-  --fonte-primaria: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+  --fonte-primaria: 'Sora', 'Inter', 'Segoe UI', 'Arial', sans-serif;
 
-  color-scheme: light;
+  color-scheme: dark;
 
-  --cor-fundo-rgb: 247 249 252;
-  --cor-superficie-rgb: 255 255 255;
-  --cor-superficie-secundaria-rgb: 244 247 251;
-  --cor-borda-rgb: 219 227 239;
-  --cor-primaria-rgb: 37 99 235;
-  --cor-primaria-hover-rgb: 29 78 216;
-  --cor-texto-rgb: 15 23 42;
-  --cor-texto-secundaria-rgb: 71 85 105;
-  --cor-campo-fundo-rgb: 255 255 255;
-  --cor-campo-borda-rgb: 219 227 239;
-  --cor-campo-placeholder-rgb: 148 163 184;
-  --cor-campo-foco-rgb: 59 130 246;
+  --gestor-primaria-rgb: 37 99 235;
+  --gestor-primaria-hover-rgb: 59 130 246;
+  --gestor-primaria-ativa-rgb: 29 78 216;
+
+  --gestor-fundo-rgb: 10 10 12;
+  --gestor-superficie-rgb: 18 18 22;
+  --gestor-elevada-rgb: 24 24 30;
+  --gestor-sutil-rgb: 31 31 39;
+  --gestor-borda-rgb: 43 43 54;
+  --gestor-borda-forte-rgb: 63 63 79;
+
+  --gestor-texto-principal-rgb: 234 234 240;
+  --gestor-texto-secundario-rgb: 191 191 204;
+  --gestor-texto-terciario-rgb: 145 145 163;
+  --gestor-texto-suave-rgb: 113 113 130;
+
+  /* aliases legados para manter compatibilidade com as classes atuais */
+  --cor-fundo-rgb: var(--gestor-fundo-rgb);
+  --cor-superficie-rgb: var(--gestor-superficie-rgb);
+  --cor-superficie-secundaria-rgb: var(--gestor-elevada-rgb);
+  --cor-borda-rgb: var(--gestor-borda-rgb);
+  --cor-primaria-rgb: var(--gestor-primaria-rgb);
+  --cor-primaria-hover-rgb: var(--gestor-primaria-hover-rgb);
+  --cor-primaria-ativa-rgb: var(--gestor-primaria-ativa-rgb);
+  --cor-texto-rgb: var(--gestor-texto-principal-rgb);
+  --cor-texto-secundaria-rgb: var(--gestor-texto-secundario-rgb);
+  --cor-texto-terciaria-rgb: var(--gestor-texto-terciario-rgb);
+  --cor-texto-suave-rgb: var(--gestor-texto-suave-rgb);
+
+  --cor-campo-fundo-rgb: 16 16 20;
+  --cor-campo-borda-rgb: var(--gestor-borda-rgb);
+  --cor-campo-placeholder-rgb: var(--gestor-texto-suave-rgb);
+  --cor-campo-foco-rgb: var(--gestor-primaria-rgb);
 
   --espacamento-1: 0.25rem;
   --espacamento-2: 0.5rem;
@@ -29,8 +50,8 @@
   --raio-lg: 1rem;
   --raio-xl: 1.25rem;
 
-  --sombra-suave: 0 8px 24px rgba(15, 23, 42, 0.06);
-  --sombra-card: 0 2px 10px rgba(15, 23, 42, 0.06);
+  --sombra-suave: 0 16px 36px rgb(4 7 14 / 0.45);
+  --sombra-card: 0 10px 24px rgb(4 7 14 / 0.4);
 
   --cor-prioridade-baixa: #64748b;
   --cor-prioridade-media: #2563eb;
@@ -38,19 +59,20 @@
   --cor-prioridade-critica: #dc2626;
 }
 
-html.tema-escuro {
-  color-scheme: dark;
+html[data-tema='claro'] {
+  color-scheme: light;
 
-  --cor-fundo-rgb: 9 11 23;
-  --cor-superficie-rgb: 16 18 34;
-  --cor-superficie-secundaria-rgb: 24 27 46;
-  --cor-borda-rgb: 44 49 74;
-  --cor-primaria-rgb: 139 92 246;
-  --cor-primaria-hover-rgb: 124 58 237;
-  --cor-texto-rgb: 238 242 255;
-  --cor-texto-secundaria-rgb: 159 168 193;
-  --cor-campo-fundo-rgb: 12 16 32;
-  --cor-campo-borda-rgb: 39 45 72;
-  --cor-campo-placeholder-rgb: 106 116 148;
-  --cor-campo-foco-rgb: 139 92 246;
+  --gestor-fundo-rgb: 241 245 249;
+  --gestor-superficie-rgb: 255 255 255;
+  --gestor-elevada-rgb: 248 250 252;
+  --gestor-sutil-rgb: 226 232 240;
+  --gestor-borda-rgb: 203 213 225;
+  --gestor-borda-forte-rgb: 148 163 184;
+  --gestor-texto-principal-rgb: 15 23 42;
+  --gestor-texto-secundario-rgb: 71 85 105;
+  --gestor-texto-terciario-rgb: 100 116 139;
+  --gestor-texto-suave-rgb: 148 163 184;
+
+  --cor-campo-fundo-rgb: 255 255 255;
+  --cor-campo-borda-rgb: 203 213 225;
 }

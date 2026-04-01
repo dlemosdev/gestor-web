@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 
 import { AcoesInterfaceService } from '../../../core/services/acoes-interface.service';
 import { StatusProjeto } from '../../../models/enums/status-projeto.enum';
@@ -15,15 +15,15 @@ import { ListaProjetosComponent } from '../componentes/lista-projetos/lista-proj
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="mx-auto flex w-full max-w-[1500px] flex-col gap-6">
-      <article class="relative overflow-hidden rounded-3xl border border-borda bg-superficie px-6 py-7 shadow-sm sm:px-7">
-        <div class="absolute inset-0 opacity-50">
-          <div class="h-full w-full bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.14),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.1),transparent_40%)]"></div>
+      <article class="relative overflow-hidden rounded-3xl border border-borda bg-superficie px-6 py-7 shadow-[var(--sombra-card)] sm:px-7">
+        <div class="absolute inset-0 opacity-55">
+          <div class="h-full w-full bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.2),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.16),transparent_40%)]"></div>
         </div>
 
         <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div class="space-y-2">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-secundaria">PortfÃ³lio</p>
-            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">GestÃ£o de Projetos</h2>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-terciaria">Portfolio</p>
+            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Gestor de Projetos</h2>
             <p class="max-w-2xl text-sm leading-6 text-cor-texto-secundaria">
               Estruture iniciativas, mantenha o controle operacional e acesse rapidamente o board de cada projeto.
             </p>
@@ -36,23 +36,23 @@ import { ListaProjetosComponent } from '../componentes/lista-projetos/lista-proj
       </article>
 
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Total de projetos</p>
           <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ totalProjetos() }}</p>
         </article>
 
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Ativos</p>
-          <p class="mt-3 text-3xl font-semibold text-emerald-500">{{ totalProjetosAtivos() }}</p>
+          <p class="mt-3 text-3xl font-semibold text-emerald-400">{{ totalProjetosAtivos() }}</p>
         </article>
 
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Arquivados</p>
-          <p class="mt-3 text-3xl font-semibold text-slate-500">{{ totalProjetosInativos() }}</p>
+          <p class="mt-3 text-3xl font-semibold text-cor-texto-terciaria">{{ totalProjetosInativos() }}</p>
         </article>
       </section>
 
-      <section class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm sm:p-5">
+      <section class="rounded-2xl border border-borda bg-superficie p-4 shadow-[var(--sombra-card)] sm:p-5">
         <div class="mb-4 flex items-center justify-between gap-3 border-b border-borda pb-3">
           <div>
             <h3 class="text-base font-semibold text-cor-texto">Todos os projetos</h3>
@@ -160,5 +160,3 @@ export class ProjetosPaginaComponent {
     }
   }
 }
-
-

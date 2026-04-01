@@ -22,17 +22,17 @@ interface ProjetoComResumo {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="mx-auto flex w-full max-w-[1500px] flex-col gap-6">
-      <article class="relative overflow-hidden rounded-3xl border border-borda bg-superficie px-6 py-7 shadow-sm sm:px-7">
-        <div class="absolute inset-0 opacity-50">
-          <div class="h-full w-full bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.15),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.14),transparent_40%)]"></div>
+      <article class="relative overflow-hidden rounded-3xl border border-borda bg-superficie px-6 py-7 shadow-[var(--sombra-card)] sm:px-7">
+        <div class="absolute inset-0 opacity-55">
+          <div class="h-full w-full bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.2),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.16),transparent_40%)]"></div>
         </div>
 
         <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div class="space-y-2">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-secundaria">Painel executivo</p>
-            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Visão consolidada do portfólio</h2>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-terciaria">Painel executivo</p>
+            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Visao consolidada do portfolio</h2>
             <p class="max-w-2xl text-sm leading-6 text-cor-texto-secundaria">
-              Acompanhe progresso, gargalos e produtividade dos projetos ativos em um único lugar.
+              Acompanhe progresso, gargalos e produtividade dos projetos ativos em um unico lugar.
             </p>
           </div>
 
@@ -44,37 +44,37 @@ interface ProjetoComResumo {
       </article>
 
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Projetos ativos</p>
           <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ projetosAtivos().length }}</p>
           <p class="mt-2 text-xs text-cor-texto-secundaria">{{ projetosInativos() }} inativo(s) no ambiente</p>
         </article>
 
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Atividades totais</p>
           <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ totalAtividades() }}</p>
           <p class="mt-2 text-xs text-cor-texto-secundaria">{{ totalRaias() }} raias mapeadas</p>
         </article>
 
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
-          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Concluídas</p>
-          <p class="mt-3 text-3xl font-semibold text-emerald-500">{{ totalConcluidas() }}</p>
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Concluidas</p>
+          <p class="mt-3 text-3xl font-semibold text-emerald-400">{{ totalConcluidas() }}</p>
           <p class="mt-2 text-xs text-cor-texto-secundaria">{{ percentualConcluidoGeral() }}% de entrega geral</p>
         </article>
 
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Bloqueadas</p>
-          <p class="mt-3 text-3xl font-semibold text-rose-500">{{ totalBloqueadas() }}</p>
-          <p class="mt-2 text-xs text-cor-texto-secundaria">Atividades que exigem ação imediata</p>
+          <p class="mt-3 text-3xl font-semibold text-rose-400">{{ totalBloqueadas() }}</p>
+          <p class="mt-2 text-xs text-cor-texto-secundaria">Atividades que exigem acao imediata</p>
         </article>
       </section>
 
       <section class="grid grid-cols-1 gap-5 xl:grid-cols-[1.8fr_1fr]">
-        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <header class="mb-4 flex items-center justify-between gap-3">
             <div>
               <h3 class="text-base font-semibold text-cor-texto">Progresso por projeto</h3>
-              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanço real das iniciativas ativas.</p>
+              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanco real das iniciativas ativas.</p>
             </div>
           </header>
 
@@ -92,7 +92,7 @@ interface ProjetoComResumo {
                   </div>
                 </div>
 
-                <div class="h-2.5 overflow-hidden rounded-full bg-slate-200/70">
+                <div class="h-2.5 overflow-hidden rounded-full bg-superficie-secundaria">
                   <div class="h-full rounded-full bg-primaria transition-all" [style.width.%]="item.percentualConcluido"></div>
                 </div>
 
@@ -101,7 +101,7 @@ interface ProjetoComResumo {
                 </div>
               </article>
             } @empty {
-              <article class="rounded-2xl border border-dashed border-borda bg-superficie-secundaria/30 p-8 text-center">
+              <article class="rounded-2xl border border-dashed border-borda bg-superficie-secundaria/20 p-8 text-center">
                 <p class="text-sm font-semibold text-cor-texto">Nenhum projeto ativo</p>
                 <p class="mt-1.5 text-xs text-cor-texto-secundaria">Crie um projeto para iniciar o acompanhamento.</p>
               </article>
@@ -110,45 +110,45 @@ interface ProjetoComResumo {
         </article>
 
         <div class="grid grid-cols-1 gap-5">
-          <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
-            <h3 class="text-base font-semibold text-cor-texto">Distribuição de status</h3>
+          <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
+            <h3 class="text-base font-semibold text-cor-texto">Distribuicao de status</h3>
             <p class="mt-1 text-xs text-cor-texto-secundaria">Panorama operacional das atividades.</p>
 
             <div class="mt-4 space-y-3">
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5">
+              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
                 <span class="text-sm text-cor-texto">Backlog</span>
-                <span class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">{{ totalBacklog() }}</span>
+                <span class="rounded-lg border border-borda bg-superficie px-2 py-1 text-xs font-semibold text-cor-texto">{{ totalBacklog() }}</span>
               </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5">
+              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
                 <span class="text-sm text-cor-texto">Em andamento</span>
-                <span class="rounded-lg bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">{{ totalEmAndamento() }}</span>
+                <span class="rounded-lg bg-blue-500/15 px-2 py-1 text-xs font-semibold text-blue-300">{{ totalEmAndamento() }}</span>
               </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5">
+              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
                 <span class="text-sm text-cor-texto">Bloqueadas</span>
-                <span class="rounded-lg bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700">{{ totalBloqueadas() }}</span>
+                <span class="rounded-lg bg-rose-500/15 px-2 py-1 text-xs font-semibold text-rose-300">{{ totalBloqueadas() }}</span>
               </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5">
-                <span class="text-sm text-cor-texto">Concluídas</span>
-                <span class="rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">{{ totalConcluidas() }}</span>
+              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
+                <span class="text-sm text-cor-texto">Concluidas</span>
+                <span class="rounded-lg bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-300">{{ totalConcluidas() }}</span>
               </div>
             </div>
           </article>
 
-          <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+          <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
             <h3 class="text-base font-semibold text-cor-texto">Projetos recentes</h3>
-            <p class="mt-1 text-xs text-cor-texto-secundaria">Últimos projetos ativos no ambiente.</p>
+            <p class="mt-1 text-xs text-cor-texto-secundaria">Ultimos projetos ativos no ambiente.</p>
 
             <div class="mt-4 space-y-2.5">
               @for (projeto of projetosAtivos().slice(0, 5); track projeto.id) {
                 <a
                   [routerLink]="['/projetos', projeto.id, 'board']"
-                  class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5 text-sm transition hover:border-blue-300"
+                  class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5 text-sm transition hover:border-primaria/50"
                 >
                   <span class="truncate text-cor-texto">{{ projeto.nome }}</span>
                   <span class="text-xs font-semibold text-cor-texto-secundaria">Abrir</span>
                 </a>
               } @empty {
-                <p class="text-xs text-cor-texto-secundaria">Nenhum projeto ativo disponível.</p>
+                <p class="text-xs text-cor-texto-secundaria">Nenhum projeto ativo disponivel.</p>
               }
             </div>
           </article>

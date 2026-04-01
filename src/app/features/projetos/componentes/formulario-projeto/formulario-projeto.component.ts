@@ -10,7 +10,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
   imports: [ReactiveFormsModule, BotaoUiComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">
+    <section class="rounded-2xl border border-borda bg-superficie p-4 shadow-[var(--sombra-card)]">
       <h3 class="text-base font-semibold text-cor-texto">
         {{ projetoEdicao() ? 'Editar projeto' : 'Novo projeto' }}
       </h3>
@@ -22,7 +22,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
             id="input-nome-projeto"
             formControlName="nome"
             type="text"
-            class="h-10 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-blue-100"
+            class="h-11 rounded-xl border border-borda bg-superficie px-3.5 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-primaria/20"
           />
         </label>
 
@@ -31,7 +31,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
           <input
             formControlName="cor"
             type="color"
-            class="h-10 rounded-xl border border-borda px-1"
+            class="h-11 rounded-xl border border-borda bg-superficie px-1.5"
           />
         </label>
 
@@ -40,7 +40,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
           <textarea
             formControlName="descricao"
             rows="3"
-            class="rounded-xl border border-borda px-3 py-2 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-blue-100"
+            class="rounded-xl border border-borda bg-superficie px-3.5 py-2.5 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-primaria/20"
           ></textarea>
         </label>
 

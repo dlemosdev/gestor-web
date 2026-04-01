@@ -6,19 +6,19 @@
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (aberto()) {
-      <div class="fixed inset-0 z-40 bg-slate-950/25 backdrop-blur-[1px]" aria-hidden="true" (click)="fechar.emit()"></div>
+      <div class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[2px]" aria-hidden="true" (click)="fechar.emit()"></div>
       <aside
-        class="fixed right-0 top-0 z-50 h-full w-full max-w-xl border-l border-borda bg-superficie p-5 shadow-2xl"
+        class="fixed right-0 top-0 z-50 h-full w-full max-w-xl border-l border-borda bg-superficie p-5 shadow-[var(--sombra-suave)]"
         role="dialog"
         aria-modal="true"
         tabindex="-1"
       >
-        <header class="mb-4 flex items-center justify-between">
+        <header class="mb-4 flex items-center justify-between border-b border-borda pb-3">
           <h2 class="text-lg font-semibold text-cor-texto">{{ titulo() }}</h2>
           <button
             type="button"
             aria-label="Fechar painel lateral"
-            class="rounded-lg border border-borda px-2 py-1 text-sm text-cor-texto hover:bg-superficie-secundaria focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
+            class="rounded-lg border border-borda bg-superficie-secundaria px-2.5 py-1.5 text-sm text-cor-texto hover:border-borda-forte hover:bg-superficie focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
             (click)="fechar.emit()"
           >
             Fechar

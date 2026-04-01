@@ -10,8 +10,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     @if (rota()) {
       <a
         [routerLink]="rota()"
-        routerLinkActive="bg-superficie-secundaria text-primaria"
-        class="flex items-center rounded-xl px-3 py-2 text-sm font-medium transition"
+        routerLinkActive="bg-primaria/15 text-primaria"
+        class="flex items-center rounded-xl px-3 py-2 text-sm font-medium transition duration-150"
         [class.justify-center]="compacto()"
         [class.gap-2]="!compacto()"
         [class]="classesBase()"
@@ -54,7 +54,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     } @else {
       <button
         type="button"
-        class="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm font-medium transition"
+        class="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm font-medium transition duration-150"
         [class.justify-center]="compacto()"
         [class.gap-2]="!compacto()"
         [class]="classesBase()"
@@ -106,9 +106,9 @@ export class ItemSidebarUiComponent {
 
   readonly classesBase = computed(() => {
     if (this.ativo()) {
-      return 'bg-superficie-secundaria text-primaria';
+      return 'bg-primaria/15 text-primaria';
     }
 
-    return 'text-cor-texto-secundaria hover:bg-superficie-secundaria hover:text-cor-texto';
+    return 'text-cor-texto-secundaria hover:bg-superficie-secundaria/70 hover:text-cor-texto';
   });
 }

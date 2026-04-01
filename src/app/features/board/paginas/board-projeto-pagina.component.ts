@@ -1,4 +1,4 @@
-﻿import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -30,8 +30,8 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="-mx-5 -mt-6 flex h-[calc(100%+3rem)] min-h-0 gap-0 overflow-hidden md:-mx-8 md:-mt-8 md:h-[calc(100%+4rem)] lg:-mx-10 lg:-mt-9 lg:h-[calc(100%+4.5rem)]">
-      <section class="min-w-0 flex min-h-0 w-full max-w-none flex-1 basis-0 flex-col gap-4 overflow-hidden">
-        <section class="flex flex-wrap items-center justify-between gap-2 border-b border-borda bg-superficie p-2.5">
+      <section class="min-w-0 flex min-h-0 w-full max-w-none flex-1 basis-0 flex-col gap-0 overflow-hidden">
+        <section class="flex flex-wrap items-center gap-2 px-3 py-2.5">
           <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -40,10 +40,11 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
               [class.bg-primaria]="filtroResponsavelAtivo() === ''"
               [class.text-white]="filtroResponsavelAtivo() === ''"
               [class.border-borda]="filtroResponsavelAtivo() !== ''"
+              [class.bg-superficie]="filtroResponsavelAtivo() !== ''"
               [class.text-cor-texto-secundaria]="filtroResponsavelAtivo() !== ''"
               (click)="aplicarFiltroRapidoResponsavel('')"
             >
-              Todos responsáveis
+              Todos responsaveis
             </button>
 
             @for (responsavel of responsaveisFiltroRapido(); track responsavel.nome) {
@@ -54,12 +55,13 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
                 [class.bg-primaria]="filtroResponsavelAtivo() === responsavel.nome"
                 [class.text-white]="filtroResponsavelAtivo() === responsavel.nome"
                 [class.border-borda]="filtroResponsavelAtivo() !== responsavel.nome"
+                [class.bg-superficie]="filtroResponsavelAtivo() !== responsavel.nome"
                 [class.text-cor-texto-secundaria]="filtroResponsavelAtivo() !== responsavel.nome"
                 (click)="aplicarFiltroRapidoResponsavel(responsavel.nome)"
               >
                 <span>{{ responsavel.nome }}</span>
                 <span
-                  class="inline-flex min-w-5 items-center justify-center rounded-lg px-1.5 py-0.5 text-[10px] font-bold"
+                  class="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold"
                   [class.bg-white/20]="filtroResponsavelAtivo() === responsavel.nome"
                   [class.text-white]="filtroResponsavelAtivo() === responsavel.nome"
                   [class.bg-superficie-secundaria]="filtroResponsavelAtivo() !== responsavel.nome"
@@ -69,23 +71,6 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
                 </span>
               </button>
             }
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              class="inline-flex h-10 items-center gap-2 rounded-xl border border-transparent bg-primaria px-3 text-sm font-semibold text-white"
-              (click)="iniciarCriacaoAtividade()"
-            >
-              Nova Atividade
-            </button>
-            <button
-              type="button"
-              class="inline-flex h-10 items-center gap-2 rounded-xl border border-borda bg-superficie px-3 text-sm font-semibold text-cor-texto-secundaria"
-              (click)="abrirDrawerNovaRaia()"
-            >
-              Nova Raia
-            </button>
           </div>
         </section>
 

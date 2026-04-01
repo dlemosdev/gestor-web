@@ -5,7 +5,7 @@
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+    <section class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
       @if (titulo()) {
         <h3 class="text-base font-semibold text-cor-texto">{{ titulo() }}</h3>
       }

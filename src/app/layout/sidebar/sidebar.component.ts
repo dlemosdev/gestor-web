@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { EstadoSidebarService } from '../../core/services/estado-sidebar.service';
 import { TemaAparenciaService } from '../../core/services/tema-aparencia.service';
@@ -10,28 +10,14 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
   imports: [ItemSidebarUiComponent, AvatarUiComponent],
   template: `
     <aside
-      class="hidden h-full min-h-0 shrink-0 border-r border-borda bg-superficie transition-[width,padding] duration-200 lg:flex lg:flex-col"
+      class="relative hidden h-full min-h-0 shrink-0 border-r border-borda bg-superficie py-3.5 transition-[width,padding] duration-200 lg:flex lg:flex-col"
       [class.w-72]="!sidebarRecolhida()"
-      [class.w-24]="sidebarRecolhida()"
-      [class.px-5]="!sidebarRecolhida()"
-      [class.px-3]="sidebarRecolhida()"
-      [class.py-4]="!sidebarRecolhida()"
-      [class.py-3]="sidebarRecolhida()"
+      [class.w-20]="sidebarRecolhida()"
+      [class.px-4]="!sidebarRecolhida()"
+      [class.px-2.5]="sidebarRecolhida()"
     >
-      <header class="mb-4 border-b border-borda pb-4">
-        <div class="flex items-center" [class.justify-center]="sidebarRecolhida()" [class.gap-3]="!sidebarRecolhida()">
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primaria text-sm font-semibold text-white">GR</div>
-          @if (!sidebarRecolhida()) {
-            <div class="min-w-0">
-              <p class="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-cor-texto-secundaria">Workspace</p>
-              <h1 class="truncate text-lg font-semibold text-cor-texto">Gestor</h1>
-            </div>
-          }
-        </div>
-      </header>
-
       <div class="flex min-h-0 flex-1 flex-col">
-        <nav class="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1" aria-label="Menu principal">
+        <nav class="flex flex-1 flex-col gap-1.5 overflow-y-auto pt-2 pr-1" aria-label="Menu principal">
           <app-item-sidebar-ui titulo="Dashboard" rota="/dashboard" icone="dashboard" [compacto]="sidebarRecolhida()" />
           <app-item-sidebar-ui titulo="Projetos" rota="/projetos" icone="projetos" [compacto]="sidebarRecolhida()" />
           <app-item-sidebar-ui titulo="Minhas tarefas" icone="tarefas" [compacto]="sidebarRecolhida()" />
@@ -39,10 +25,10 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
           <app-item-sidebar-ui titulo="Configuracoes" icone="configuracoes" [compacto]="sidebarRecolhida()" />
         </nav>
 
-        <div class="mt-4 border-t border-borda pt-4">
+        <div class="mt-3 border-t border-borda pt-3">
           <button
             type="button"
-            class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:bg-superficie hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
+            class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:border-borda-forte hover:bg-superficie hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
             [class.w-full]="!sidebarRecolhida()"
             [class.w-10]="sidebarRecolhida()"
             [attr.aria-label]="temaEscuroAtivo() ? 'Ativar tema claro' : 'Ativar tema escuro'"
@@ -68,7 +54,7 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
       </div>
 
       <footer
-        class="mt-4 flex items-center rounded-2xl border border-borda bg-superficie-secundaria transition-all duration-200"
+        class="mt-3 flex items-center rounded-2xl border border-borda bg-superficie-secundaria transition-all duration-200"
         [class.justify-center]="sidebarRecolhida()"
         [class.gap-3]="!sidebarRecolhida()"
         [class.p-2.5]="sidebarRecolhida()"
@@ -96,4 +82,3 @@ export class SidebarComponent {
     this.temaAparenciaService.alternarTema();
   }
 }
-

@@ -45,7 +45,7 @@ export class BotaoUiComponent {
 
   readonly classesBotao = computed(() => {
     const classesBase =
-      'inline-flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60';
+      'inline-flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria focus-visible:ring-offset-2 focus-visible:ring-offset-fundo disabled:cursor-not-allowed disabled:opacity-60';
 
     const mapaTamanho: Record<string, string> = {
       sm: 'h-9 px-3',
@@ -53,10 +53,10 @@ export class BotaoUiComponent {
     };
 
     const mapaVariante: Record<string, string> = {
-      primario: 'border-transparent bg-primaria text-white hover:bg-primaria-hover',
-      secundario: 'border-borda bg-superficie text-cor-texto hover:bg-superficie-secundaria',
-      fantasma: 'border-transparent bg-transparent text-cor-texto hover:bg-superficie-secundaria',
-      perigo: 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100',
+      primario: 'border-transparent bg-primaria text-white hover:bg-primaria-hover active:bg-primaria-ativa',
+      secundario: 'border-borda bg-superficie text-cor-texto hover:border-borda-forte hover:bg-superficie-secundaria',
+      fantasma: 'border-transparent bg-transparent text-cor-texto-secundaria hover:bg-superficie-secundaria hover:text-cor-texto',
+      perigo: 'border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20',
     };
 
     return `${classesBase} ${mapaTamanho[this.tamanho()]} ${mapaVariante[this.variante()]}`;

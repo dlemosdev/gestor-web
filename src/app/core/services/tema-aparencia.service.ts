@@ -13,7 +13,7 @@ export class TemaAparenciaService {
   private readonly documento = inject(DOCUMENT);
   private readonly armazenamentoLocalService = inject(ArmazenamentoLocalService);
 
-  private readonly temaAtualSignal = signal<TemaAparencia>('claro');
+  private readonly temaAtualSignal = signal<TemaAparencia>('escuro');
   readonly temaAtual: Signal<TemaAparencia> = this.temaAtualSignal.asReadonly();
 
   constructor() {
@@ -40,17 +40,8 @@ export class TemaAparenciaService {
       return;
     }
 
-    const temaInicial: TemaAparencia = this.sistemaPrefereTemaEscuro() ? 'escuro' : 'claro';
-    this.temaAtualSignal.set(temaInicial);
-    this.aplicarTemaNoDocumento(temaInicial);
-  }
-
-  private sistemaPrefereTemaEscuro(): boolean {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-      return false;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.temaAtualSignal.set('escuro');
+    this.aplicarTemaNoDocumento('escuro');
   }
 
   private aplicarTemaNoDocumento(tema: TemaAparencia): void {
