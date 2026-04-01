@@ -1,59 +1,159 @@
-# GestaoRaias
+﻿# Gestor
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Aplicação web SaaS para gestão visual de projetos e atividades em formato Kanban, com foco em produtividade, UX corporativa e arquitetura frontend escalável.
 
-## Development server
+## Visão geral
 
-To start a local development server, run:
+O **Gestor** permite organizar projetos por boards independentes, com **raias dinâmicas** e movimentação de atividades via drag and drop.
 
-```bash
-ng serve
+Referências de experiência: Jira, Linear, Trello e ClickUp, com adaptação para um fluxo direto e legível para equipes brasileiras.
+
+## Principais funcionalidades
+
+- Gestão de projetos:
+  - criar, editar e arquivar/ativar projeto
+  - acesso rápido ao board de cada projeto
+- Board por projeto:
+  - raias dinâmicas (criar, renomear, excluir, reordenar)
+  - cards de atividade com drag and drop entre raias
+  - ordenação de atividades dentro da mesma raia
+- Atividades:
+  - criação e edição em drawer lateral
+  - campos completos (título, descrição, prioridade, status, responsável, prazo)
+  - checklist e comentários mockados
+  - exclusão com modal de confirmação
+- Filtros:
+  - filtro rápido por responsável no topo do board
+- Layout e UX:
+  - sidebar responsiva (expandida/recolhida)
+  - tema claro/escuro com persistência local
+  - componentes visuais reutilizáveis
+- Persistência local:
+  - armazenamento via `localStorage`
+  - seed inicial automático com dados mockados
+
+## Stack e tecnologias
+
+- Angular 21 (Standalone Components)
+- TypeScript
+- Angular Signals
+- Angular CDK (drag and drop)
+- Reactive Forms
+- Tailwind CSS
+- Persistência local (localStorage)
+
+## Arquitetura do projeto
+
+Estrutura baseada em separação por camadas e features:
+
+```text
+src/app
+├─ core
+│  └─ services
+├─ features
+│  ├─ dashboard
+│  ├─ projetos
+│  ├─ board
+│  └─ atividades
+├─ layout
+│  ├─ shell
+│  └─ sidebar
+├─ models
+├─ services
+└─ shared
+   └─ ui
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Design system interno
 
-## Code scaffolding
+Tokens e padrões visuais centralizados em:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- `src/styles/tokens.css`
+- `src/styles/tailwind.css`
 
-```bash
-ng generate component component-name
-```
+Componentes compartilhados em `src/app/shared/ui`, incluindo:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- botão
+- input/campo de texto
+- seletor
+- badge
+- avatar
+- card
+- drawer
+- estado vazio/carregamento
+- diálogo de confirmação
 
-```bash
-ng generate --help
-```
+## Dados e persistência
 
-## Building
+A aplicação funciona sem backend real neste estágio.
 
-To build the project run:
+- Serviços de domínio persistem dados no `localStorage`.
+- Prefixo atual das chaves: `gestor:*`
+- Seed inicial gerado por `DadosMockService`.
 
-```bash
-ng build
-```
+## Requisitos
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- Node.js 22+
+- npm 10+
 
-## Running unit tests
+## Como executar localmente
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+1. Instalar dependências:
 
 ```bash
-ng e2e
+npm install
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+2. Rodar ambiente de desenvolvimento:
 
-## Additional Resources
+```bash
+npm start
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+3. Acessar no navegador:
+
+```text
+http://localhost:4200
+```
+
+## Scripts disponíveis
+
+- `npm start`: sobe o servidor de desenvolvimento
+- `npm run build`: gera build de produção
+- `npm run watch`: build em modo watch
+- `npm test`: executa testes
+
+## Build de produção
+
+```bash
+npm run build
+```
+
+Saída em:
+
+```text
+dist/gestor
+```
+
+## Repositório remoto
+
+- GitHub: [dlemosdev/gestor-web](https://github.com/dlemosdev/gestor-web)
+- Branch principal: `main`
+
+## Convenções de código
+
+- Nomenclatura orientada a PT-BR em serviços, métodos e domínio de negócio.
+- Componentes standalone e foco em reutilização.
+- Evitar lógica complexa em template; priorizar `computed`/signals e serviços.
+
+## Roadmap recomendado
+
+- Integração com backend REST
+- Autenticação/autorização
+- Histórico/auditoria de mudanças
+- Filtros avançados por etiquetas e período
+- Métricas e relatórios operacionais
+
+## Licença
+
+Uso interno/projeto privado (ajustar conforme política da organização).
