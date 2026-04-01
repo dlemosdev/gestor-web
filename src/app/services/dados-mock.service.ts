@@ -107,7 +107,10 @@ export class DadosMockService {
         status: StatusAtividade.BACKLOG,
         responsavel: 'Ana Paula',
         prazo: '2026-04-04',
-        etiquetas: ['Arquitetura', 'Planejamento'],
+        etiquetas: [
+          { nome: 'Arquitetura', cor: '#2563EB' },
+          { nome: 'Planejamento', cor: '#7C3AED' },
+        ],
         checklist: [
           { id: 'check-1', titulo: 'Refinar escopo', concluido: true },
           { id: 'check-2', titulo: 'Validar com produto', concluido: false },
@@ -135,7 +138,10 @@ export class DadosMockService {
         status: StatusAtividade.EM_ANDAMENTO,
         responsavel: 'Carla Souza',
         prazo: '2026-04-06',
-        etiquetas: ['UX', 'Design System'],
+        etiquetas: [
+          { nome: 'UX', cor: '#0891B2' },
+          { nome: 'Design System', cor: '#16A34A' },
+        ],
         checklist: [
           { id: 'check-3', titulo: 'Fluxo principal', concluido: true },
           { id: 'check-4', titulo: 'Fluxo mobile', concluido: false },
@@ -155,7 +161,10 @@ export class DadosMockService {
         status: StatusAtividade.BLOQUEADA,
         responsavel: 'Diego Lima',
         prazo: '2026-04-02',
-        etiquetas: ['API', 'Bloqueio'],
+        etiquetas: [
+          { nome: 'API', cor: '#EA580C' },
+          { nome: 'Bloqueio', cor: '#DC2626' },
+        ],
         checklist: [],
         comentarios: [],
         ordem: 1,

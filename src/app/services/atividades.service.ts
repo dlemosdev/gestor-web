@@ -6,6 +6,7 @@ import { Atividade } from '../models/atividade.model';
 import { ChecklistItem } from '../models/checklist-item.model';
 import { Prioridade } from '../models/enums/prioridade.enum';
 import { StatusAtividade } from '../models/enums/status-atividade.enum';
+import { EtiquetaAtividade } from '../models/etiqueta-atividade.model';
 import { DadosMockService } from './dados-mock.service';
 
 @Injectable({
@@ -200,11 +201,40 @@ export class AtividadesService {
 
   private carregar(): void {
     const atividadesSalvas = this.armazenamentoLocalService.obterItem<Atividade[]>(this.chaveAtividades);
-    this.atividadesInterno.set(atividadesSalvas ?? []);
+    const atividadesNormalizadas = (atividadesSalvas ?? []).map((atividade) => ({
+      ...atividade,
+      etiquetas: this.normalizarEtiquetas(atividade.etiquetas as unknown[]),
+    }));
+    this.atividadesInterno.set(atividadesNormalizadas);
+    this.persistir();
   }
 
   private persistir(): void {
     this.armazenamentoLocalService.salvarItem(this.chaveAtividades, this.atividadesInterno());
+  }
+
+  private normalizarEtiquetas(etiquetas: unknown[]): EtiquetaAtividade[] {
+    if (!Array.isArray(etiquetas)) {
+      return [];
+    }
+
+    return etiquetas
+      .map((etiqueta) => {
+        if (typeof etiqueta === 'string') {
+          return { nome: etiqueta, cor: '#64748B' };
+        }
+
+        const etiquetaObj = etiqueta as Partial<EtiquetaAtividade>;
+        if (typeof etiquetaObj.nome !== 'string' || !etiquetaObj.nome.trim()) {
+          return null;
+        }
+
+        return {
+          nome: etiquetaObj.nome.trim(),
+          cor: etiquetaObj.cor && /^#([0-9A-Fa-f]{6})$/.test(etiquetaObj.cor) ? etiquetaObj.cor : '#64748B',
+        };
+      })
+      .filter((etiqueta): etiqueta is EtiquetaAtividade => etiqueta !== null);
   }
 }
 

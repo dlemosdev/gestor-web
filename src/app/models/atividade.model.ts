@@ -1,7 +1,8 @@
-﻿import { Prioridade } from './enums/prioridade.enum';
-import { StatusAtividade } from './enums/status-atividade.enum';
-import { ChecklistItem } from './checklist-item.model';
+﻿import { ChecklistItem } from './checklist-item.model';
 import { Comentario } from './comentario.model';
+import { StatusAtividade } from './enums/status-atividade.enum';
+import { Prioridade } from './enums/prioridade.enum';
+import { EtiquetaAtividade } from './etiqueta-atividade.model';
 
 export interface Atividade {
   id: string;
@@ -13,11 +14,10 @@ export interface Atividade {
   status: StatusAtividade;
   responsavel: string;
   prazo: string;
-  etiquetas: string[];
+  etiquetas: EtiquetaAtividade[];
   checklist: ChecklistItem[];
   comentarios: Comentario[];
   ordem: number;
   criadoEm: string;
   atualizadoEm: string;
 }
-

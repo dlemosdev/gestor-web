@@ -183,7 +183,8 @@ export class BoardProjetoPaginaComponent {
         .filter((atividade) => {
           if (filtroAtual.busca.trim()) {
             const textoBusca = filtroAtual.busca.trim().toLowerCase();
-            const campoIndexado = `${atividade.titulo} ${atividade.descricao} ${atividade.etiquetas.join(' ')}`.toLowerCase();
+            const textoEtiquetas = atividade.etiquetas.map((etiqueta) => etiqueta.nome).join(' ');
+            const campoIndexado = `${atividade.titulo} ${atividade.descricao} ${textoEtiquetas}`.toLowerCase();
 
             if (!campoIndexado.includes(textoBusca)) {
               return false;

@@ -49,8 +49,15 @@ import { DialogoConfirmacaoUiComponent } from '../../../../shared/ui/dialogo-con
 
       <div class="mt-3.5 flex flex-wrap gap-1.5">
         <app-badge-ui [texto]="atividade().prioridade" [variante]="variantePrioridade()" />
-        @for (etiqueta of atividade().etiquetas.slice(0, 2); track etiqueta) {
-          <app-badge-ui [texto]="etiqueta" variante="neutro" />
+        @for (etiqueta of atividade().etiquetas; track etiqueta.nome) {
+          <span
+            class="inline-flex items-center rounded-lg border px-2 py-1 text-xs font-semibold"
+            [style.backgroundColor]="etiqueta.cor + '20'"
+            [style.borderColor]="etiqueta.cor + '66'"
+            [style.color]="etiqueta.cor"
+          >
+            {{ etiqueta.nome }}
+          </span>
         }
       </div>
 
