@@ -61,7 +61,7 @@ export class FormularioProjetoComponent {
 
   readonly projetoEdicao = input<Projeto | null>(null);
 
-  readonly salvarProjeto = output<Omit<Projeto, 'id' | 'criadoEm' | 'atualizadoEm' | 'status'> & { id?: string }>();
+  readonly salvarProjeto = output<Omit<Projeto, 'id' | 'criadoEm' | 'atualizadoEm' | 'status' | 'principal'> & { id?: string }>();
   readonly cancelarEdicao = output<void>();
 
   readonly formularioProjeto = this.fb.group({

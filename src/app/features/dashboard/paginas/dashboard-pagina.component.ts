@@ -1,9 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+﻿import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
 import { Projeto } from '../../../models/projeto.model';
 import { StatusAtividade } from '../../../models/enums/status-atividade.enum';
-import { StatusProjeto } from '../../../models/enums/status-projeto.enum';
 import { AtividadesService } from '../../../services/atividades.service';
 import { ProjetosService } from '../../../services/projetos.service';
 import { RaiasService } from '../../../services/raias.service';
@@ -18,7 +16,7 @@ interface ProjetoComResumo {
 
 @Component({
   standalone: true,
-  imports: [BotaoUiComponent, RouterLink],
+  imports: [BotaoUiComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="mx-auto flex w-full max-w-[1500px] flex-col gap-6">
@@ -32,7 +30,7 @@ interface ProjetoComResumo {
             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-terciaria">Painel executivo</p>
             <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Visao consolidada do portfolio</h2>
             <p class="max-w-2xl text-sm leading-6 text-cor-texto-secundaria">
-              Acompanhe progresso, gargalos e produtividade dos projetos ativos em um unico lugar.
+              Acompanhe progresso, gargalos e produtividade dos projetos em um unico lugar.
             </p>
           </div>
 
@@ -45,9 +43,9 @@ interface ProjetoComResumo {
 
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Projetos ativos</p>
-          <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ projetosAtivos().length }}</p>
-          <p class="mt-2 text-xs text-cor-texto-secundaria">{{ projetosInativos() }} inativo(s) no ambiente</p>
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Projetos cadastrados</p>
+          <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ totalProjetos() }}</p>
+          <p class="mt-2 text-xs text-cor-texto-secundaria">{{ totalProjetosComBoard() }} com board configurado</p>
         </article>
 
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
@@ -74,7 +72,7 @@ interface ProjetoComResumo {
           <header class="mb-4 flex items-center justify-between gap-3">
             <div>
               <h3 class="text-base font-semibold text-cor-texto">Progresso por projeto</h3>
-              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanco real das iniciativas ativas.</p>
+              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanco real das iniciativas em andamento.</p>
             </div>
           </header>
 
@@ -102,7 +100,7 @@ interface ProjetoComResumo {
               </article>
             } @empty {
               <article class="rounded-2xl border border-dashed border-borda bg-superficie-secundaria/20 p-8 text-center">
-                <p class="text-sm font-semibold text-cor-texto">Nenhum projeto ativo</p>
+                <p class="text-sm font-semibold text-cor-texto">Nenhum projeto cadastrado</p>
                 <p class="mt-1.5 text-xs text-cor-texto-secundaria">Crie um projeto para iniciar o acompanhamento.</p>
               </article>
             }
@@ -133,25 +131,6 @@ interface ProjetoComResumo {
               </div>
             </div>
           </article>
-
-          <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-            <h3 class="text-base font-semibold text-cor-texto">Projetos recentes</h3>
-            <p class="mt-1 text-xs text-cor-texto-secundaria">Ultimos projetos ativos no ambiente.</p>
-
-            <div class="mt-4 space-y-2.5">
-              @for (projeto of projetosAtivos().slice(0, 5); track projeto.id) {
-                <a
-                  [routerLink]="['/projetos', projeto.id, 'board']"
-                  class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2.5 text-sm transition hover:border-primaria/50"
-                >
-                  <span class="truncate text-cor-texto">{{ projeto.nome }}</span>
-                  <span class="text-xs font-semibold text-cor-texto-secundaria">Abrir</span>
-                </a>
-              } @empty {
-                <p class="text-xs text-cor-texto-secundaria">Nenhum projeto ativo disponivel.</p>
-              }
-            </div>
-          </article>
         </div>
       </section>
     </section>
@@ -162,12 +141,10 @@ export class DashboardPaginaComponent {
   private readonly raiasService = inject(RaiasService);
   private readonly atividadesService = inject(AtividadesService);
 
-  readonly projetosAtivos = computed(() =>
-    this.projetosService.projetos().filter((projeto) => projeto.status === StatusProjeto.ATIVO),
-  );
-
-  readonly projetosInativos = computed(
-    () => this.projetosService.projetos().filter((projeto) => projeto.status === StatusProjeto.INATIVO).length,
+  readonly projetos = computed(() => this.projetosService.projetos());
+  readonly totalProjetos = computed(() => this.projetos().length);
+  readonly totalProjetosComBoard = computed(
+    () => this.projetos().filter((projeto) => this.projetosService.projetoPossuiBoard(projeto.id)).length,
   );
 
   readonly totalRaias = computed(() => this.raiasService.raias().length);
@@ -200,7 +177,7 @@ export class DashboardPaginaComponent {
   });
 
   readonly projetosComResumo = computed<ProjetoComResumo[]>(() =>
-    this.projetosAtivos()
+    this.projetos()
       .map((projeto) => {
         const atividadesProjeto = this.atividadesService
           .atividades()
@@ -221,7 +198,7 @@ export class DashboardPaginaComponent {
   );
 
   readonly rotaBoardPrincipal = computed(() => {
-    const projetoPrincipal = this.projetosAtivos()[0];
+    const projetoPrincipal = this.projetosService.obterProjetoPrincipal() ?? this.projetos()[0];
     return projetoPrincipal ? ['/projetos', projetoPrincipal.id, 'board'] : '/projetos';
   });
 }

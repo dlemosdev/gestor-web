@@ -119,6 +119,11 @@ export class AtividadesService {
     this.persistir();
   }
 
+  excluirAtividadesDoProjeto(projetoId: string): void {
+    this.atividadesInterno.update((listaAtual) => listaAtual.filter((atividade) => atividade.projetoId !== projetoId));
+    this.persistir();
+  }
+
   atualizarChecklist(atividadeId: string, checklist: ChecklistItem[]): void {
     const atividade = this.obterAtividadePorId(atividadeId);
 

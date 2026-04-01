@@ -109,6 +109,11 @@ export class RaiasService {
     this.persistir();
   }
 
+  excluirRaiasDoProjeto(projetoId: string): void {
+    this.raiasInterno.update((listaAtual) => listaAtual.filter((raia) => raia.projetoId !== projetoId));
+    this.persistir();
+  }
+
   atualizarOrdemRaias(projetoId: string, raiasReordenadas: Raia[]): void {
     const idsReordenados = new Set(raiasReordenadas.map((raia) => raia.id));
 

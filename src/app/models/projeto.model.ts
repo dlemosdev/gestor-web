@@ -5,6 +5,7 @@ export interface Projeto {
   nome: string;
   descricao: string;
   cor?: string;
+  principal: boolean;
   criadoEm: string;
   atualizadoEm: string;
   status: StatusProjeto;

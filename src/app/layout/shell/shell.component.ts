@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+ï»¿import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { SidebarComponent } from '../sidebar/sidebar.component';
@@ -23,7 +23,7 @@ import { TopbarComponent } from '../topbar/topbar.component';
 
         <main
           id="conteudo-principal"
-          class="flex min-h-0 flex-1 flex-col px-5 py-6 pb-16 md:px-8 md:py-7 lg:px-10 lg:py-8 lg:pb-8"
+          class="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 py-6 pb-16 md:px-8 md:py-7 lg:px-10 lg:py-8 lg:pb-8"
           tabindex="-1"
         >
           <router-outlet />
@@ -31,7 +31,7 @@ import { TopbarComponent } from '../topbar/topbar.component';
       </div>
     </div>
 
-    <nav class="fixed inset-x-0 bottom-0 z-30 grid h-14 grid-cols-2 border-t border-borda bg-superficie lg:hidden" aria-label="Navegação mobile">
+    <nav class="fixed inset-x-0 bottom-0 z-30 grid h-14 grid-cols-2 border-t border-borda bg-superficie lg:hidden" aria-label="NavegaÃ§Ã£o mobile">
       <a
         routerLink="/dashboard"
         routerLinkActive="text-primaria"
@@ -50,3 +50,4 @@ import { TopbarComponent } from '../topbar/topbar.component';
   `,
 })
 export class ShellComponent {}
+

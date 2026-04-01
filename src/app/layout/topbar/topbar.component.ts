@@ -11,11 +11,11 @@ import { ProjetosService } from '../../services/projetos.service';
   selector: 'app-topbar',
   standalone: true,
   template: `
-    <header class="border-b border-borda bg-superficie/92 backdrop-blur-md" role="banner">
+    <header class="relative bg-superficie/92 backdrop-blur-md" role="banner">
       <div class="flex h-[3.75rem] min-w-0">
         <div
-          class="relative flex shrink-0 items-center gap-2.5 border-r border-borda transition-[width,padding] duration-200"
-          [class.w-72]="!sidebarRecolhida()"
+          class="relative flex shrink-0 items-center justify-center transition-[width,padding] duration-200"
+          [class.w-60]="!sidebarRecolhida()"
           [class.w-20]="sidebarRecolhida()"
           [class.px-4]="!sidebarRecolhida()"
           [class.px-2.5]="sidebarRecolhida()"
@@ -70,6 +70,15 @@ import { ProjetosService } from '../../services/projetos.service';
           }
         </div>
       </div>
+
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-borda-forte/90 to-transparent"
+      ></div>
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-x-0 -bottom-1 h-3 bg-gradient-to-b from-superficie-secundaria/35 to-transparent"
+      ></div>
     </header>
   `,
 })

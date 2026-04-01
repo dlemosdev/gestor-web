@@ -21,7 +21,8 @@ import { CardProjetoComponent } from '../card-projeto/card-projeto.component';
           <app-card-projeto
             [projeto]="projeto"
             (editarProjeto)="editarProjeto.emit($event)"
-            (alternarStatusProjeto)="alternarStatusProjeto.emit($event)"
+            (alternarProjetoPrincipal)="alternarProjetoPrincipal.emit($event)"
+            (solicitarExclusaoProjeto)="solicitarExclusaoProjeto.emit($event)"
           />
         }
       </section>
@@ -32,7 +33,8 @@ export class ListaProjetosComponent {
   readonly projetos = input.required<Projeto[]>();
 
   readonly editarProjeto = output<Projeto>();
-  readonly alternarStatusProjeto = output<Projeto>();
+  readonly alternarProjetoPrincipal = output<Projeto>();
+  readonly solicitarExclusaoProjeto = output<Projeto>();
 }
 
 

@@ -55,6 +55,7 @@ export class DadosMockService {
         nome: 'Portal Corporativo',
         descricao: 'Evolução do portal institucional com board visual por raias dinâmicas.',
         cor: '#2563eb',
+        principal: true,
         criadoEm: agora,
         atualizadoEm: agora,
         status: StatusProjeto.ATIVO,
@@ -64,6 +65,7 @@ export class DadosMockService {
         nome: 'Aplicativo Comercial',
         descricao: 'Organização das iniciativas mobile para o ciclo Q2.',
         cor: '#0ea5e9',
+        principal: false,
         criadoEm: agora,
         atualizadoEm: agora,
         status: StatusProjeto.ATIVO,
@@ -73,9 +75,10 @@ export class DadosMockService {
         nome: 'Migração CRM',
         descricao: 'Planejamento técnico e acompanhamento da migração de dados de vendas.',
         cor: '#6366f1',
+        principal: false,
         criadoEm: agora,
         atualizadoEm: agora,
-        status: StatusProjeto.INATIVO,
+        status: StatusProjeto.ATIVO,
       },
     ];
 

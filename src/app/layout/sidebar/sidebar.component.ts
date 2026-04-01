@@ -10,19 +10,25 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
   imports: [ItemSidebarUiComponent, AvatarUiComponent],
   template: `
     <aside
-      class="relative hidden h-full min-h-0 shrink-0 border-r border-borda bg-superficie py-3.5 transition-[width,padding] duration-200 lg:flex lg:flex-col"
-      [class.w-72]="!sidebarRecolhida()"
+      class="relative hidden h-full min-h-0 shrink-0 bg-superficie/92 py-3.5 backdrop-blur-md transition-[width,padding] duration-200 lg:flex lg:flex-col"
+      [class.w-60]="!sidebarRecolhida()"
       [class.w-20]="sidebarRecolhida()"
       [class.px-4]="!sidebarRecolhida()"
       [class.px-2.5]="sidebarRecolhida()"
     >
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-borda-forte/80 to-transparent"
+      ></div>
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute -right-[1px] top-0 h-full w-4 bg-gradient-to-r from-superficie-secundaria/40 to-transparent"
+      ></div>
+
       <div class="flex min-h-0 flex-1 flex-col">
         <nav class="flex flex-1 flex-col gap-1.5 overflow-y-auto pt-2 pr-1" aria-label="Menu principal">
           <app-item-sidebar-ui titulo="Dashboard" rota="/dashboard" icone="dashboard" [compacto]="sidebarRecolhida()" />
           <app-item-sidebar-ui titulo="Projetos" rota="/projetos" icone="projetos" [compacto]="sidebarRecolhida()" />
-          <app-item-sidebar-ui titulo="Minhas tarefas" icone="tarefas" [compacto]="sidebarRecolhida()" />
-          <app-item-sidebar-ui titulo="Relatorios" icone="relatorios" [compacto]="sidebarRecolhida()" />
-          <app-item-sidebar-ui titulo="Configuracoes" icone="configuracoes" [compacto]="sidebarRecolhida()" />
         </nav>
 
         <div class="mt-3 border-t border-borda pt-3">
