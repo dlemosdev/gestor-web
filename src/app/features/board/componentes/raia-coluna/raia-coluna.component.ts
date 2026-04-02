@@ -18,20 +18,11 @@ export interface EventoSoltarAtividade {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="flex h-full min-w-0 w-full flex-col rounded-2xl border border-borda bg-superficie p-3" [attr.aria-label]="'Raia ' + raia().nome">
-      <header
-        cdkDragHandle
-        class="mb-3 flex cursor-grab items-center justify-between gap-2 rounded-lg active:cursor-grabbing"
-        aria-label="Arrastar para reordenar raia"
-        title="Arrastar para reordenar raia"
-      >
+      <header cdkDragHandle class="mb-3 flex cursor-grab items-center justify-between gap-2 rounded-lg active:cursor-grabbing" aria-label="Arrastar para reordenar raia" title="Arrastar para reordenar raia">
         <div class="min-w-0 flex-1">
           <p class="truncate text-left text-sm font-semibold text-cor-texto">{{ raia().nome }}</p>
         </div>
-
-        <span
-          class="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primaria px-1.5 text-[11px] font-bold leading-none text-white"
-          [attr.aria-label]="atividades().length + ' atividades na raia'"
-        >
+        <span class="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primaria px-1.5 text-[11px] font-bold leading-none text-white" [attr.aria-label]="atividades().length + ' atividades na raia'">
           {{ textoContadorAtividades() }}
         </span>
       </header>
@@ -45,8 +36,6 @@ export interface EventoSoltarAtividade {
         [cdkDropListData]="atividades()"
         [cdkDropListConnectedTo]="idsConectados()"
         (cdkDropListDropped)="soltar.emit({ evento: $event, raiaDestinoId: raia().id })"
-        role="list"
-        aria-label="Atividades da raia"
       >
         @if (atividades().length === 0) {
           <app-estado-vazio-ui titulo="Raia vazia" descricao="Nenhuma atividade nesta etapa." />
@@ -57,6 +46,7 @@ export interface EventoSoltarAtividade {
             [atividade]="atividade"
             [arrastarDesabilitado]="arrastarDesabilitado() || raiaEhConcluida()"
             (abrirDetalhes)="abrirDetalhesAtividade.emit($event)"
+            (editarAtividade)="editarAtividade.emit($event)"
             (excluirAtividade)="excluirAtividade.emit($event)"
           />
         }
@@ -72,6 +62,7 @@ export class RaiaColunaComponent {
 
   readonly excluirAtividade = output<string>();
   readonly abrirDetalhesAtividade = output<Atividade>();
+  readonly editarAtividade = output<Atividade>();
   readonly soltar = output<EventoSoltarAtividade>();
 
   textoContadorAtividades(): string {

@@ -38,18 +38,17 @@ export class AtividadesService {
     return this.historicosAtividadeInterno()[atividadeId] ?? [];
   }
 
-  criarAtividadeRapida(projetoId: string, raiaId: string, titulo: string, responsavelPadrao: string): void {
+  criarAtividadeRapida(projetoId: string, titulo: string, responsavelPadrao: string): void {
     const agora = new Date().toISOString();
 
     this.http
       .post<Atividade>(`${apiUrlBase}/projetos/${projetoId}/atividades`, {
-        raiaId,
         tipo: TipoAtividade.HU,
         atividadePaiId: null,
         titulo,
         descricao: 'Descricao inicial. Edite pelos detalhes da atividade.',
+        descricaoDetalhada: null,
         prioridade: Prioridade.MEDIA,
-        status: StatusAtividade.BACKLOG,
         responsavel: responsavelPadrao,
         prazo: agora.slice(0, 10),
         etiquetas: [],
@@ -70,13 +69,12 @@ export class AtividadesService {
   criarAtividadeCompleta(novaAtividade: Atividade): void {
     this.http
       .post<Atividade>(`${apiUrlBase}/projetos/${novaAtividade.projetoId}/atividades`, {
-        raiaId: novaAtividade.raiaId,
         tipo: novaAtividade.tipo,
         atividadePaiId: novaAtividade.atividadePaiId,
         titulo: novaAtividade.titulo,
         descricao: novaAtividade.descricao,
+        descricaoDetalhada: novaAtividade.descricaoDetalhada,
         prioridade: novaAtividade.prioridade,
-        status: novaAtividade.status,
         responsavel: novaAtividade.responsavel,
         prazo: novaAtividade.prazo,
         etiquetas: novaAtividade.etiquetas,
@@ -104,6 +102,7 @@ export class AtividadesService {
         atividadePaiId: atividadeAtualizada.atividadePaiId,
         titulo: atividadeAtualizada.titulo,
         descricao: atividadeAtualizada.descricao,
+        descricaoDetalhada: atividadeAtualizada.descricaoDetalhada,
         prioridade: atividadeAtualizada.prioridade,
         status: atividadeAtualizada.status,
         responsavel: atividadeAtualizada.responsavel,
@@ -165,6 +164,7 @@ export class AtividadesService {
         atividadePaiId: atividadeMovida.atividadePaiId,
         titulo: atividadeMovida.titulo,
         descricao: atividadeMovida.descricao,
+        descricaoDetalhada: atividadeMovida.descricaoDetalhada,
         prioridade: atividadeMovida.prioridade,
         status: atividadeMovida.status,
         responsavel: atividadeMovida.responsavel,
@@ -325,6 +325,7 @@ export class AtividadesService {
         atividadePaiId: atividadeMovida.atividadePaiId,
         titulo: atividadeMovida.titulo,
         descricao: atividadeMovida.descricao,
+        descricaoDetalhada: atividadeMovida.descricaoDetalhada,
         prioridade: atividadeMovida.prioridade,
         status: atividadeMovida.status,
         responsavel: atividadeMovida.responsavel,
@@ -450,6 +451,7 @@ export class AtividadesService {
       codigoReferencia: atividade.codigoReferencia ?? '',
       tipo: atividade.tipo ?? TipoAtividade.HU,
       atividadePaiId: atividade.atividadePaiId ?? null,
+      descricaoDetalhada: atividade.descricaoDetalhada ?? null,
       dataConclusao: atividade.dataConclusao ?? null,
       etiquetas: this.normalizarEtiquetas(atividade.etiquetas as unknown[]),
       checklist: Array.isArray(atividade.checklist) ? atividade.checklist : [],

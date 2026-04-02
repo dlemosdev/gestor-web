@@ -14,6 +14,7 @@ export interface Atividade {
   atividadePaiId: string | null;
   titulo: string;
   descricao: string;
+  descricaoDetalhada: string | null;
   prioridade: Prioridade;
   status: StatusAtividade;
   responsavel: string;

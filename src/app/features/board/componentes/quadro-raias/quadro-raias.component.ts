@@ -15,18 +15,13 @@ export interface RaiaComAtividades {
   selector: 'app-quadro-raias',
   standalone: true,
   imports: [DragDropModule, EstadoVazioUiComponent, RaiaColunaComponent],
-  host: {
-    class: 'block h-full min-h-0',
-  },
+  host: { class: 'block h-full min-h-0' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (raiasComAtividades().length === 0) {
-      <app-estado-vazio-ui
-        titulo="Nenhuma raia configurada"
-        descricao="Esse projeto não possui raias visíveis no board."
-      />
+      <app-estado-vazio-ui titulo="Nenhuma raia configurada" descricao="Esse projeto nao possui raias visiveis no board." />
     } @else {
-      <section class="flex h-full min-h-0 flex-col pt-2" aria-label="Quadro de raias">
+      <section class="flex h-full min-h-0 flex-col pt-2">
         <div
           class="lista-raias flex h-full min-h-0 flex-1 items-stretch gap-3 overflow-x-auto overflow-y-hidden px-2 pb-0 snap-x snap-proximity lg:gap-2.5 lg:overflow-x-hidden"
           cdkDropList
@@ -34,20 +29,17 @@ export interface RaiaComAtividades {
           [cdkDropListAutoScrollStep]="24"
           [cdkDropListData]="raiasComAtividades()"
           (cdkDropListDropped)="reordenarRaias($event)"
-          aria-label="Lista horizontal de raias"
         >
           @for (item of raiasComAtividades(); track item.raia.id) {
-            <div
-              cdkDrag
-              cdkDragLockAxis="x"
-              class="relative h-full w-[82vw] min-w-[260px] max-w-[340px] snap-start flex-none pb-2 lg:w-auto lg:min-w-0 lg:max-w-none lg:flex-1 lg:basis-0"
-            >
+            <div cdkDrag cdkDragLockAxis="x" class="relative h-full w-[82vw] min-w-[260px] max-w-[340px] snap-start flex-none pb-2 lg:w-auto lg:min-w-0 lg:max-w-none lg:flex-1 lg:basis-0">
               <app-raia-coluna
                 [raia]="item.raia"
                 [atividades]="item.atividades"
                 [idsConectados]="idsDropList()"
                 [arrastarDesabilitado]="arrastarDesabilitado()"
                 (abrirDetalhesAtividade)="abrirDetalhesAtividade.emit($event)"
+                (editarAtividade)="editarAtividade.emit($event)"
+                (excluirAtividade)="excluirAtividade.emit($event)"
                 (soltar)="soltarAtividade.emit($event)"
               />
             </div>
@@ -56,40 +48,19 @@ export interface RaiaComAtividades {
       </section>
     }
   `,
-  styles: `
-    .lista-raias {
-      scroll-behavior: smooth;
-      scroll-padding-left: 0.5rem;
-      scroll-padding-right: 0.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      .lista-raias {
-        scroll-padding-left: 0;
-        scroll-padding-right: 0;
-      }
-    }
-
-    .lista-raias.cdk-drop-list-dragging > div:not(.cdk-drag-placeholder) {
-      transition: transform 150ms cubic-bezier(0.2, 0, 0, 1);
-    }
-  `,
 })
 export class QuadroRaiasComponent {
   readonly raiasComAtividades = input<RaiaComAtividades[]>([]);
   readonly arrastarDesabilitado = input(false);
-
   readonly abrirDetalhesAtividade = output<Atividade>();
+  readonly editarAtividade = output<Atividade>();
+  readonly excluirAtividade = output<string>();
   readonly soltarAtividade = output<EventoSoltarAtividade>();
   readonly moverRaia = output<RaiaComAtividades[]>();
-
   readonly idsDropList = computed(() => this.raiasComAtividades().map((item) => `raia-drop-${item.raia.id}`));
 
   reordenarRaias(evento: CdkDragDrop<RaiaComAtividades[]>): void {
-    if (evento.previousIndex === evento.currentIndex) {
-      return;
-    }
-
+    if (evento.previousIndex === evento.currentIndex) return;
     const lista = [...this.raiasComAtividades()];
     moveItemInArray(lista, evento.previousIndex, evento.currentIndex);
     this.moverRaia.emit(lista);

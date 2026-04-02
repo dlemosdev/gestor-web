@@ -55,6 +55,12 @@ interface CorEtiqueta {
         </label>
       </section>
 
+      @if (modoCriacao()) {
+        <div class="rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-200">
+          A nova atividade será criada automaticamente na raia Backlog com status Backlog.
+        </div>
+      }
+
       @if (!modoCriacao() && atividade().dataConclusao) {
         <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-300">
           Concluída em {{ atividade().dataConclusao }}
@@ -88,8 +94,13 @@ interface CorEtiqueta {
       </label>
 
       <label class="flex flex-col gap-1.5">
-        <span class="text-xs font-semibold text-cor-texto-secundaria">Descrição</span>
-        <textarea formControlName="descricao" rows="4" class="rounded-xl border border-borda px-3 py-2.5 text-sm outline-none focus:border-primaria"></textarea>
+        <span class="text-xs font-semibold text-cor-texto-secundaria">Descrição resumida</span>
+        <textarea formControlName="descricao" rows="3" class="rounded-xl border border-borda px-3 py-2.5 text-sm outline-none focus:border-primaria"></textarea>
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-xs font-semibold text-cor-texto-secundaria">Descrição detalhada</span>
+        <textarea formControlName="descricaoDetalhada" rows="8" class="rounded-xl border border-borda px-3 py-2.5 text-sm outline-none focus:border-primaria"></textarea>
       </label>
 
       <section class="space-y-2.5">
@@ -151,14 +162,16 @@ interface CorEtiqueta {
       </section>
 
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <label class="flex flex-col gap-1.5">
-          <span class="text-xs font-semibold text-cor-texto-secundaria">Raia</span>
-          <select formControlName="raiaId" class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria">
-            @for (opcao of opcoesRaias(); track opcao.valor) {
-              <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
-            }
-          </select>
-        </label>
+        @if (!modoCriacao()) {
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-cor-texto-secundaria">Raia</span>
+            <select formControlName="raiaId" class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria">
+              @for (opcao of opcoesRaias(); track opcao.valor) {
+                <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
+              }
+            </select>
+          </label>
+        }
 
         <label class="flex flex-col gap-1.5">
           <span class="text-xs font-semibold text-cor-texto-secundaria">Prioridade</span>
@@ -169,14 +182,16 @@ interface CorEtiqueta {
           </select>
         </label>
 
-        <label class="flex flex-col gap-1.5">
-          <span class="text-xs font-semibold text-cor-texto-secundaria">Status</span>
-          <select formControlName="status" class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria">
-            @for (opcao of opcoesStatus; track opcao.valor) {
-              <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
-            }
-          </select>
-        </label>
+        @if (!modoCriacao()) {
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-cor-texto-secundaria">Status</span>
+            <select formControlName="status" class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria">
+              @for (opcao of opcoesStatus; track opcao.valor) {
+                <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
+              }
+            </select>
+          </label>
+        }
       </div>
 
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -263,11 +278,12 @@ export class FormularioAtividadeComponent {
   readonly formularioAtividade = this.fb.group({
     tipo: [TipoAtividade.HU, Validators.required],
     atividadePaiId: [''],
-    raiaId: ['', Validators.required],
+    raiaId: [''],
     titulo: ['', [Validators.required, Validators.minLength(3)]],
     descricao: ['', [Validators.required, Validators.minLength(8)]],
+    descricaoDetalhada: [''],
     prioridade: [Prioridade.MEDIA, Validators.required],
-    status: [StatusAtividade.BACKLOG, Validators.required],
+    status: [StatusAtividade.BACKLOG],
     responsavel: ['', Validators.required],
     prazo: ['', Validators.required],
   });
@@ -286,6 +302,7 @@ export class FormularioAtividadeComponent {
         raiaId: atividade.raiaId,
         titulo: atividade.titulo,
         descricao: atividade.descricao,
+        descricaoDetalhada: atividade.descricaoDetalhada ?? '',
         prioridade: atividade.prioridade,
         status: atividade.status,
         responsavel: atividade.responsavel,
@@ -309,11 +326,12 @@ export class FormularioAtividadeComponent {
       ...this.atividade(),
       tipo,
       atividadePaiId,
-      raiaId: valor.raiaId ?? this.atividade().raiaId,
+      raiaId: this.modoCriacao() ? this.atividade().raiaId : valor.raiaId ?? this.atividade().raiaId,
       titulo: valor.titulo ?? this.atividade().titulo,
       descricao: valor.descricao ?? this.atividade().descricao,
+      descricaoDetalhada: valor.descricaoDetalhada?.trim() ? valor.descricaoDetalhada.trim() : null,
       prioridade: (valor.prioridade as Prioridade) ?? this.atividade().prioridade,
-      status: (valor.status as StatusAtividade) ?? this.atividade().status,
+      status: this.modoCriacao() ? StatusAtividade.BACKLOG : ((valor.status as StatusAtividade) ?? this.atividade().status),
       responsavel: valor.responsavel ?? this.atividade().responsavel,
       prazo: valor.prazo ?? this.atividade().prazo,
       etiquetas: this.etiquetasEditadas(),
