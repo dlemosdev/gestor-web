@@ -91,7 +91,7 @@ type EtapaLogin = 'credenciais' | 'segundo-fator';
         }
 
         <footer class="mt-5 rounded-xl border border-borda bg-superficie-secundaria/40 px-3 py-2 text-xs text-cor-texto-terciaria">
-          Usuário inicial: <strong class="text-cor-texto">ana.paula@empresa.com</strong> | senha: <strong class="text-cor-texto">Gestor@123</strong>
+          Usuário inicial: <strong class="text-cor-texto">dennerlemos.dev@gmail.com</strong> | senha: <strong class="text-cor-texto">Gestor@123</strong>
         </footer>
       </section>
     </main>
