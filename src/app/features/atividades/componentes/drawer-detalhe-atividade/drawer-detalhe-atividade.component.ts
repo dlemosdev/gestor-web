@@ -1,8 +1,9 @@
-﻿import { DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { Atividade } from '../../../../models/atividade.model';
 import { ChecklistItem } from '../../../../models/checklist-item.model';
+import { HistoricoAtividade } from '../../../../models/historico-atividade.model';
 import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component';
 import { DrawerLateralUiComponent } from '../../../../shared/ui/drawer-lateral/drawer-lateral-ui.component';
 import { OpcaoSeletorUi } from '../../../../shared/ui/seletor/seletor-ui.component';
@@ -51,14 +52,28 @@ import { FormularioAtividadeComponent } from '../formulario-atividade/formulario
             </div>
 
             <section class="rounded-2xl border border-borda bg-superficie-secundaria p-4">
-              <h4 class="text-sm font-semibold text-cor-texto">Histórico (mock)</h4>
-              <ul class="mt-3 list-disc space-y-1.5 pl-4 text-xs text-cor-texto-secundaria">
-                <li>Código: {{ atividade()!.codigoReferencia || 'Será gerado ao cadastrar' }}</li>
-                <li>Atividade criada em {{ atividade()!.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</li>
+              <h4 class="text-sm font-semibold text-cor-texto">Histórico</h4>
+              <ul class="mt-3 space-y-2 text-xs text-cor-texto-secundaria">
+                <li class="rounded-xl border border-borda bg-superficie px-3 py-2">
+                  <p class="font-medium text-cor-texto">Código: {{ atividade()!.codigoReferencia || 'Será gerado ao cadastrar' }}</p>
+                  <span>Criada em {{ atividade()!.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </li>
                 @if (atividade()!.dataConclusao) {
-                  <li>Concluída em {{ atividade()!.dataConclusao | date: 'dd/MM/yyyy HH:mm' }}</li>
+                  <li class="rounded-xl border border-borda bg-superficie px-3 py-2">
+                    <p class="font-medium text-cor-texto">Atividade concluída</p>
+                    <span>{{ atividade()!.dataConclusao | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </li>
                 }
-                <li>Última atualização em {{ atividade()!.atualizadoEm | date: 'dd/MM/yyyy HH:mm' }}</li>
+                @for (evento of historico(); track evento.id) {
+                  <li class="rounded-xl border border-borda bg-superficie px-3 py-2">
+                    <p class="font-medium text-cor-texto">{{ evento.descricao }}</p>
+                    <span>{{ evento.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </li>
+                }
+                <li class="rounded-xl border border-borda bg-superficie px-3 py-2">
+                  <p class="font-medium text-cor-texto">Última atualização</p>
+                  <span>{{ atividade()!.atualizadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </li>
               </ul>
             </section>
           }
@@ -77,6 +92,7 @@ import { FormularioAtividadeComponent } from '../formulario-atividade/formulario
 export class DrawerDetalheAtividadeComponent {
   readonly aberto = input(false);
   readonly atividade = input<Atividade | null>(null);
+  readonly historico = input<HistoricoAtividade[]>([]);
   readonly responsaveis = input<OpcaoSeletorUi[]>([]);
   readonly opcoesRaias = input<OpcaoSeletorUi[]>([]);
   readonly historiasUsuarioDisponiveis = input<Atividade[]>([]);

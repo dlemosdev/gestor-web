@@ -1,5 +1,5 @@
-﻿export enum StatusProjeto {
+export enum StatusProjeto {
   ATIVO = 'ATIVO',
   INATIVO = 'INATIVO',
+  CONCLUIDO = 'CONCLUIDO',
 }
-

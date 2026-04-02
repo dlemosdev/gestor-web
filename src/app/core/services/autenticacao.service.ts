@@ -10,9 +10,11 @@ interface RespostaAutenticacao {
   usuario: Usuario;
 }
 
-interface RespostaLoginDoisFatores {
+interface RespostaLogin {
   requerSegundoFator: boolean;
-  tokenDesafio: string;
+  tokenDesafio?: string;
+  tokenAcesso?: string;
+  usuario?: Usuario;
 }
 
 @Injectable({
@@ -33,20 +35,37 @@ export class AutenticacaoService {
 
   constructor(private readonly http: HttpClient) {}
 
-  async solicitarCodigoSegundoFator(email: string, senha: string): Promise<string> {
+  async autenticar(email: string, senha: string): Promise<{ requerSegundoFator: boolean; tokenDesafio: string | null }> {
     const resposta = await firstValueFrom(
-      this.http.post<RespostaLoginDoisFatores>(
+      this.http.post<RespostaLogin>(
         `${this.urlAutenticacao}/login`,
         { email: email.trim().toLowerCase(), senha },
         { withCredentials: true },
       ),
     );
 
-    if (!resposta.requerSegundoFator || !resposta.tokenDesafio) {
+    if (resposta.requerSegundoFator) {
+      if (!resposta.tokenDesafio) {
+        throw new Error('Resposta de autenticação inválida.');
+      }
+
+      return {
+        requerSegundoFator: true,
+        tokenDesafio: resposta.tokenDesafio,
+      };
+    }
+
+    if (!resposta.tokenAcesso || !resposta.usuario) {
       throw new Error('Resposta de autenticação inválida.');
     }
 
-    return resposta.tokenDesafio;
+    this.tokenAcessoInterno.set(resposta.tokenAcesso);
+    this.usuarioAutenticadoInterno.set(resposta.usuario);
+
+    return {
+      requerSegundoFator: false,
+      tokenDesafio: null,
+    };
   }
 
   async validarSegundoFator(tokenDesafio: string, codigo: string): Promise<void> {

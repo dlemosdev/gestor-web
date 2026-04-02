@@ -51,7 +51,7 @@ type EtapaLogin = 'credenciais' | 'segundo-fator';
 
             <app-botao-ui
               class="block"
-              [texto]="carregando() ? 'Enviando codigo...' : 'Continuar'"
+              [texto]="carregando() ? 'Entrando...' : 'Continuar'"
               [desabilitado]="formularioLogin.invalid || carregando()"
               [larguraTotal]="true"
               [tipo]="'submit'"
@@ -153,13 +153,17 @@ export class LoginPaginaComponent {
 
     try {
       const { email, senha } = this.formularioLogin.getRawValue();
-      const tokenDesafio = await this.autenticacaoService.solicitarCodigoSegundoFator(email, senha);
+      const respostaLogin = await this.autenticacaoService.autenticar(email, senha);
 
-      this.tokenDesafio.set(tokenDesafio);
-      this.emailInformado.set(email);
-      this.definirCodigoCompleto('');
-      this.etapaAtual.set('segundo-fator');
-      queueMicrotask(() => this.focarCampoCodigo(0));
+      if (respostaLogin.requerSegundoFator) {
+        this.tokenDesafio.set(respostaLogin.tokenDesafio);
+        this.emailInformado.set(email);
+        this.definirCodigoCompleto('');
+        this.etapaAtual.set('segundo-fator');
+        queueMicrotask(() => this.focarCampoCodigo(0));
+      } else {
+        await this.roteador.navigateByUrl('/dashboard');
+      }
     } catch (erro) {
       this.mensagemErro.set(this.extrairMensagemErro(erro, 'Falha ao autenticar. Verifique suas credenciais.'));
     } finally {

@@ -5,10 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { AcoesInterfaceService } from '../../../core/services/acoes-interface.service';
 import { Atividade } from '../../../models/atividade.model';
 import { Prioridade } from '../../../models/enums/prioridade.enum';
+import { StatusProjeto } from '../../../models/enums/status-projeto.enum';
 import { StatusAtividade } from '../../../models/enums/status-atividade.enum';
 import { TipoAtividade } from '../../../models/enums/tipo-atividade.enum';
 import { OpcaoSeletorUi } from '../../../shared/ui/seletor/seletor-ui.component';
 import { AtividadesService } from '../../../services/atividades.service';
+import { ProjetosService } from '../../../services/projetos.service';
 import { RaiasService } from '../../../services/raias.service';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { DrawerDetalheAtividadeComponent } from '../../atividades/componentes/drawer-detalhe-atividade/drawer-detalhe-atividade.component';
@@ -25,6 +27,12 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
   template: `
     <section class="-mx-5 -mt-6 flex h-[calc(100%+3rem)] min-h-0 gap-0 overflow-hidden md:-mx-8 md:-mt-8 md:h-[calc(100%+4rem)] lg:-mx-10 lg:-mt-9 lg:h-[calc(100%+4.5rem)]">
       <section class="min-w-0 flex min-h-0 w-full max-w-none flex-1 basis-0 flex-col gap-0 overflow-hidden">
+        @if (projetoConcluido()) {
+          <div class="mx-3 mb-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            Projeto concluído. O board está disponível para consulta, mas as atividades não podem ser movidas entre raias.
+          </div>
+        }
+
         <section class="flex flex-wrap items-center gap-2 px-3 py-2.5">
           <div class="flex flex-wrap items-center gap-2">
             <button
@@ -71,7 +79,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
         <app-quadro-raias
           class="block h-full w-full min-h-0 flex-1 overflow-hidden"
           [raiasComAtividades]="raiasComAtividadesFiltradas()"
-          [arrastarDesabilitado]="filtrosAtivos()"
+          [arrastarDesabilitado]="filtrosAtivos() || projetoConcluido()"
           (abrirDetalhesAtividade)="abrirDetalhesAtividade($event.id)"
           (soltarAtividade)="moverAtividade($event.evento, $event.raiaDestinoId)"
           (moverRaia)="reordenarRaias($event)"
@@ -82,6 +90,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
     <app-drawer-detalhe-atividade
       [aberto]="atividadeNoDrawer() !== null"
       [atividade]="atividadeNoDrawer()"
+      [historico]="historicoAtividadeSelecionada()"
       [responsaveis]="opcoesResponsaveis()"
       [opcoesRaias]="opcoesRaias()"
       [historiasUsuarioDisponiveis]="historiasUsuarioRelacionaveis()"
@@ -99,6 +108,7 @@ export class BoardProjetoPaginaComponent {
   private readonly acoesInterfaceService = inject(AcoesInterfaceService);
   private readonly raiasService = inject(RaiasService);
   private readonly atividadesService = inject(AtividadesService);
+  private readonly projetosService = inject(ProjetosService);
   private readonly usuariosService = inject(UsuariosService);
 
   private readonly idProjetoRota = this.rotaAtiva.snapshot.paramMap.get('id') ?? '';
@@ -143,6 +153,8 @@ export class BoardProjetoPaginaComponent {
 
   readonly raiasProjeto = computed(() => this.raiasService.obterRaiasPorProjeto(this.idProjetoRota));
   readonly atividadesProjeto = computed(() => this.atividadesService.obterAtividadesPorProjeto(this.idProjetoRota));
+  readonly projetoAtual = computed(() => this.projetosService.obterProjetoPorId(this.idProjetoRota));
+  readonly projetoConcluido = computed(() => this.projetoAtual()?.status === StatusProjeto.CONCLUIDO);
 
   readonly filtrosAtivos = computed(() => {
     const filtro = this.filtros();
@@ -162,6 +174,10 @@ export class BoardProjetoPaginaComponent {
   readonly modoCriacaoAtividade = computed(() => this.atividadeRascunho() !== null);
   readonly atividadeNoDrawer = computed(() => this.atividadeRascunho() ?? this.atividadeSelecionada());
   readonly filtroResponsavelAtivo = computed(() => this.filtros().responsavel);
+  readonly historicoAtividadeSelecionada = computed(() => {
+    const atividadeId = this.atividadeNoDrawer()?.id;
+    return atividadeId ? this.atividadesService.obterHistoricoAtividade(atividadeId) : [];
+  });
 
   readonly raiasComAtividadesFiltradas = computed<RaiaComAtividades[]>(() => {
     const filtroAtual = this.filtros();
@@ -316,7 +332,7 @@ export class BoardProjetoPaginaComponent {
   }
 
   moverAtividade(evento: CdkDragDrop<Atividade[]>, raiaDestinoId: string): void {
-    if (this.filtrosAtivos()) {
+    if (this.filtrosAtivos() || this.projetoConcluido()) {
       return;
     }
 

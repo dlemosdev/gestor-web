@@ -9,7 +9,8 @@ export interface DadosFormularioProjeto {
   id?: string;
   nome: string;
   descricao: string;
-  cor?: string;
+  dataInicial: string | null;
+  dataFinal: string | null;
   raiasPadrao: RaiaPadraoProjeto[];
 }
 
@@ -36,11 +37,11 @@ export interface DadosFormularioProjeto {
         </label>
 
         <label class="flex flex-col gap-1">
-          <span class="text-xs font-medium text-cor-texto-secundaria">Cor</span>
+          <span class="text-xs font-medium text-cor-texto-secundaria">Data inicial</span>
           <input
-            formControlName="cor"
-            type="color"
-            class="h-11 rounded-xl border border-borda bg-superficie px-1.5"
+            formControlName="dataInicial"
+            type="date"
+            class="h-11 rounded-xl border border-borda bg-superficie px-3.5 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-primaria/20"
           />
         </label>
 
@@ -51,6 +52,15 @@ export interface DadosFormularioProjeto {
             rows="3"
             class="rounded-xl border border-borda bg-superficie px-3.5 py-2.5 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-primaria/20"
           ></textarea>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-cor-texto-secundaria">Data final</span>
+          <input
+            formControlName="dataFinal"
+            type="date"
+            class="h-11 rounded-xl border border-borda bg-superficie px-3.5 text-sm outline-none focus:border-primaria focus:ring-2 focus:ring-primaria/20"
+          />
         </label>
 
         @if (!projetoEdicao()) {
@@ -104,7 +114,8 @@ export class FormularioProjetoComponent {
   readonly formularioProjeto = this.fb.group({
     nome: ['', [Validators.required, Validators.minLength(3)]],
     descricao: ['', [Validators.required, Validators.minLength(8)]],
-    cor: ['#2563eb'],
+    dataInicial: [''],
+    dataFinal: [''],
   });
 
   private readonly raiasSelecionadasInterno = this.fb.nonNullable.control<RaiaPadraoProjeto[]>([
@@ -123,7 +134,8 @@ export class FormularioProjetoComponent {
         this.formularioProjeto.patchValue({
           nome: projeto.nome,
           descricao: projeto.descricao,
-          cor: projeto.cor ?? '#2563eb',
+          dataInicial: projeto.dataInicial ?? '',
+          dataFinal: projeto.dataFinal ?? '',
         });
         return;
       }
@@ -131,7 +143,8 @@ export class FormularioProjetoComponent {
       this.formularioProjeto.reset({
         nome: '',
         descricao: '',
-        cor: '#2563eb',
+        dataInicial: '',
+        dataFinal: '',
       });
       this.raiasSelecionadasInterno.setValue(['BACKLOG', 'EM_ANDAMENTO', 'TESTE', 'AGUARDANDO_PUBLICACAO', 'CONCLUIDAS']);
     });
@@ -173,12 +186,13 @@ export class FormularioProjetoComponent {
       id: this.projetoEdicao()?.id,
       nome: valor.nome?.trim() ?? '',
       descricao: valor.descricao?.trim() ?? '',
-      cor: valor.cor ?? '#2563eb',
+      dataInicial: valor.dataInicial?.trim() || null,
+      dataFinal: valor.dataFinal?.trim() || null,
       raiasPadrao: this.projetoEdicao() ? [] : this.raiasSelecionadas(),
     });
 
     if (!this.projetoEdicao()) {
-      this.formularioProjeto.reset({ nome: '', descricao: '', cor: '#2563eb' });
+      this.formularioProjeto.reset({ nome: '', descricao: '', dataInicial: '', dataFinal: '' });
       this.raiasSelecionadasInterno.setValue(['BACKLOG', 'EM_ANDAMENTO', 'TESTE', 'AGUARDANDO_PUBLICACAO', 'CONCLUIDAS']);
     }
   }

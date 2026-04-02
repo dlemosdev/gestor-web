@@ -11,6 +11,7 @@ interface ProjetoComResumo {
   totalAtividades: number;
   concluidas: number;
   percentualConcluido: number;
+  classesBarraProgresso: string;
 }
 
 interface ResumoRaiaDashboard {
@@ -102,7 +103,7 @@ interface ResumoRaiaDashboard {
                 </div>
 
                 <div class="h-2.5 overflow-hidden rounded-full bg-superficie-secundaria">
-                  <div class="h-full rounded-full bg-primaria transition-all" [style.width.%]="item.percentualConcluido"></div>
+                  <div class="h-full rounded-full transition-all" [class]="item.classesBarraProgresso" [style.width.%]="item.percentualConcluido"></div>
                 </div>
 
                 <div class="mt-3 flex justify-end">
@@ -196,6 +197,7 @@ export class DashboardPaginaComponent {
           totalAtividades,
           concluidas,
           percentualConcluido,
+          classesBarraProgresso: this.obterClassesBarraProgresso(percentualConcluido),
         };
       })
       .sort((a, b) => b.percentualConcluido - a.percentualConcluido),
@@ -232,6 +234,22 @@ export class DashboardPaginaComponent {
       default:
         return 'border border-borda bg-superficie text-cor-texto';
     }
+  }
+
+  private obterClassesBarraProgresso(percentualConcluido: number): string {
+    if (percentualConcluido === 100) {
+      return 'bg-emerald-500';
+    }
+
+    if (percentualConcluido >= 31) {
+      return 'bg-amber-400';
+    }
+
+    if (percentualConcluido >= 1) {
+      return 'bg-red-500';
+    }
+
+    return 'bg-primaria';
   }
 
   private normalizarNomeRaia(nomeRaia: string): string {

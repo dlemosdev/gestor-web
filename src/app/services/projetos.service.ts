@@ -3,9 +3,9 @@ import { Injectable, signal } from '@angular/core';
 
 import { apiUrlBase } from '../core/config/api.config';
 import { StatusProjeto } from '../models/enums/status-projeto.enum';
+import { HistoricoProjeto } from '../models/historico-projeto.model';
 import { Projeto } from '../models/projeto.model';
 import { RaiaPadraoProjeto } from '../models/raias-padrao-projeto';
-import { AtividadesService } from './atividades.service';
 import { RaiasService } from './raias.service';
 
 @Injectable({
@@ -15,12 +15,13 @@ export class ProjetosService {
   private readonly urlProjetos = `${apiUrlBase}/projetos`;
 
   private readonly projetosInterno = signal<Projeto[]>([]);
+  private readonly historicosProjetoInterno = signal<Record<string, HistoricoProjeto[]>>({});
   readonly projetos = this.projetosInterno.asReadonly();
+  readonly historicosProjeto = this.historicosProjetoInterno.asReadonly();
 
   constructor(
     private readonly http: HttpClient,
     private readonly raiasService: RaiasService,
-    private readonly atividadesService: AtividadesService,
   ) {
     this.carregarProjetos();
   }
@@ -33,22 +34,28 @@ export class ProjetosService {
     return this.projetosInterno().find((projeto) => projeto.principal) ?? null;
   }
 
+  obterHistoricoProjeto(projetoId: string): HistoricoProjeto[] {
+    return this.historicosProjetoInterno()[projetoId] ?? [];
+  }
+
   projetoPossuiBoard(projetoId: string): boolean {
     return this.raiasService.obterRaiasPorProjeto(projetoId).length > 0;
   }
 
-  criarProjeto(dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'> & { raiasPadrao: RaiaPadraoProjeto[] }): void {
+  criarProjeto(dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'dataInicial' | 'dataFinal'> & { raiasPadrao: RaiaPadraoProjeto[] }): void {
     this.http
       .post<Projeto>(this.urlProjetos, {
         nome: dadosProjeto.nome,
         descricao: dadosProjeto.descricao,
-        cor: dadosProjeto.cor ?? null,
+        dataInicial: dadosProjeto.dataInicial ?? null,
+        dataFinal: dadosProjeto.dataFinal ?? null,
         raiasPadrao: dadosProjeto.raiasPadrao,
       })
       .subscribe({
         next: (projetoCriado) => {
           this.projetosInterno.update((listaAtual) => [this.normalizarProjeto(projetoCriado), ...listaAtual]);
           this.raiasService.carregarRaiasProjeto(projetoCriado.id);
+          this.carregarHistoricoProjeto(projetoCriado.id);
           this.garantirProjetoPrincipalLocal();
         },
         error: (erro) => {
@@ -57,18 +64,20 @@ export class ProjetosService {
       });
   }
 
-  atualizarProjeto(projetoId: string, dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'>): void {
+  atualizarProjeto(projetoId: string, dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'dataInicial' | 'dataFinal'>): void {
     this.http
       .put<Projeto>(`${this.urlProjetos}/${projetoId}`, {
         nome: dadosProjeto.nome,
         descricao: dadosProjeto.descricao,
-        cor: dadosProjeto.cor ?? null,
+        dataInicial: dadosProjeto.dataInicial ?? null,
+        dataFinal: dadosProjeto.dataFinal ?? null,
       })
       .subscribe({
         next: (projetoAtualizado) => {
           this.projetosInterno.update((listaAtual) =>
             listaAtual.map((projeto) => (projeto.id === projetoId ? this.normalizarProjeto(projetoAtualizado) : projeto)),
           );
+          this.carregarHistoricoProjeto(projetoId);
         },
         error: (erro) => {
           console.error('Falha ao atualizar projeto na API.', erro);
@@ -86,6 +95,7 @@ export class ProjetosService {
             atualizadoEm: projeto.id === projetoPrincipalAtualizado.id ? projetoPrincipalAtualizado.atualizadoEm : projeto.atualizadoEm,
           })),
         );
+        this.carregarHistoricoProjeto(projetoId);
       },
       error: (erro) => {
         console.error('Falha ao definir projeto principal na API.', erro);
@@ -93,22 +103,17 @@ export class ProjetosService {
     });
   }
 
-  excluirProjeto(projetoId: string): void {
-    const snapshotAnterior = this.projetosInterno();
-
-    this.projetosInterno.update((listaAtual) => listaAtual.filter((projeto) => projeto.id !== projetoId));
-    this.raiasService.excluirRaiasDoProjeto(projetoId);
-    this.atividadesService.excluirAtividadesDoProjeto(projetoId);
-    this.garantirProjetoPrincipalLocal();
-
-    this.http.delete<void>(`${this.urlProjetos}/${projetoId}`).subscribe({
-      next: () => {
-        this.carregarProjetos();
+  atualizarStatusProjeto(projetoId: string, status: StatusProjeto): void {
+    this.http.patch<Projeto>(`${this.urlProjetos}/${projetoId}/status`, { status }).subscribe({
+      next: (projetoAtualizado) => {
+        this.projetosInterno.update((listaAtual) =>
+          listaAtual.map((projeto) => (projeto.id === projetoId ? this.normalizarProjeto(projetoAtualizado) : projeto)),
+        );
+        this.carregarHistoricoProjeto(projetoId);
       },
       error: (erro) => {
-        this.projetosInterno.set(snapshotAnterior);
         this.carregarProjetos();
-        console.error('Falha ao excluir projeto na API.', erro);
+        console.error('Falha ao atualizar status do projeto na API.', erro);
       },
     });
   }
@@ -116,7 +121,9 @@ export class ProjetosService {
   private carregarProjetos(): void {
     this.http.get<Projeto[]>(this.urlProjetos).subscribe({
       next: (projetosApi) => {
-        this.projetosInterno.set(projetosApi.map((projeto) => this.normalizarProjeto(projeto)));
+        const projetosNormalizados = projetosApi.map((projeto) => this.normalizarProjeto(projeto));
+        this.projetosInterno.set(projetosNormalizados);
+        projetosNormalizados.forEach((projeto) => this.carregarHistoricoProjeto(projeto.id));
         this.garantirProjetoPrincipalLocal();
       },
       error: (erro) => {
@@ -149,12 +156,30 @@ export class ProjetosService {
     );
   }
 
+  private carregarHistoricoProjeto(projetoId: string): void {
+    this.http.get<HistoricoProjeto[]>(`${this.urlProjetos}/${projetoId}/historico`).subscribe({
+      next: (historico) => {
+        this.historicosProjetoInterno.update((estadoAtual) => ({
+          ...estadoAtual,
+          [projetoId]: historico,
+        }));
+      },
+      error: (erro) => {
+        console.error('Falha ao carregar histórico do projeto na API.', erro);
+      },
+    });
+  }
+
   private normalizarProjeto(projeto: Projeto): Projeto {
     return {
       ...projeto,
-      cor: projeto.cor ?? undefined,
       status: projeto.status ?? StatusProjeto.ATIVO,
       principal: Boolean(projeto.principal),
+      dataInicial: projeto.dataInicial ?? null,
+      dataFinal: projeto.dataFinal ?? null,
+      inativadoEm: projeto.inativadoEm ?? null,
+      concluidoEm: projeto.concluidoEm ?? null,
+      reativadoEm: projeto.reativadoEm ?? null,
     };
   }
 }

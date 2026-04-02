@@ -9,6 +9,7 @@ import { Prioridade } from '../models/enums/prioridade.enum';
 import { StatusAtividade } from '../models/enums/status-atividade.enum';
 import { TipoAtividade } from '../models/enums/tipo-atividade.enum';
 import { EtiquetaAtividade } from '../models/etiqueta-atividade.model';
+import { HistoricoAtividade } from '../models/historico-atividade.model';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,9 @@ export class AtividadesService {
   private readonly urlAtividades = `${apiUrlBase}/atividades`;
 
   private readonly atividadesInterno = signal<Atividade[]>([]);
+  private readonly historicosAtividadeInterno = signal<Record<string, HistoricoAtividade[]>>({});
   readonly atividades = this.atividadesInterno.asReadonly();
+  readonly historicosAtividade = this.historicosAtividadeInterno.asReadonly();
 
   constructor(private readonly http: HttpClient) {
     this.carregarAtividades();
@@ -29,6 +32,10 @@ export class AtividadesService {
 
   obterAtividadePorId(atividadeId: string): Atividade | null {
     return this.atividadesInterno().find((atividade) => atividade.id === atividadeId) ?? null;
+  }
+
+  obterHistoricoAtividade(atividadeId: string): HistoricoAtividade[] {
+    return this.historicosAtividadeInterno()[atividadeId] ?? [];
   }
 
   criarAtividadeRapida(projetoId: string, raiaId: string, titulo: string, responsavelPadrao: string): void {
@@ -52,6 +59,7 @@ export class AtividadesService {
       .subscribe({
         next: (atividadeCriada) => {
           this.atividadesInterno.update((listaAtual) => [...listaAtual, this.normalizarAtividade(atividadeCriada)]);
+          this.carregarHistoricoAtividade(atividadeCriada.id);
         },
         error: (erro) => {
           console.error('Falha ao criar atividade rápida na API.', erro);
@@ -78,6 +86,7 @@ export class AtividadesService {
       .subscribe({
         next: (atividadeCriada) => {
           this.atividadesInterno.update((listaAtual) => [...listaAtual, this.normalizarAtividade(atividadeCriada)]);
+          this.carregarHistoricoAtividade(atividadeCriada.id);
         },
         error: (erro) => {
           console.error('Falha ao criar atividade na API.', erro);
@@ -106,6 +115,7 @@ export class AtividadesService {
       .subscribe({
         next: (atividadeApi) => {
           this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+          this.carregarHistoricoAtividade(atividadeAtualizada.id);
         },
         error: (erro) => {
           this.recarregarAtividadePorId(atividadeAtualizada.id);
@@ -167,6 +177,7 @@ export class AtividadesService {
         next: () => {
           this.reordenarAtividadesRaiaNaApi(atividadeAtual.raiaId, atividadesOrigem);
           this.reordenarAtividadesRaiaNaApi(atividadeMovida.raiaId, [...atividadesDestino, atividadeMovida]);
+          this.carregarHistoricoAtividade(atividadeMovida.id);
         },
         error: (erro) => {
           this.carregarAtividades();
@@ -223,6 +234,7 @@ export class AtividadesService {
       .subscribe({
         next: (atividadeApi) => {
           this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+          this.carregarHistoricoAtividade(atividadeId);
         },
         error: (erro) => {
           this.recarregarAtividadePorId(atividadeId);
@@ -325,6 +337,7 @@ export class AtividadesService {
         next: () => {
           this.reordenarAtividadesRaiaNaApi(raiaOrigemId, atividadesOrigem);
           this.reordenarAtividadesRaiaNaApi(raiaDestinoId, atividadesDestino);
+          this.carregarHistoricoAtividade(atividadeMovida.id);
         },
         error: (erro) => {
           this.carregarAtividades();
@@ -338,6 +351,7 @@ export class AtividadesService {
       next: (atividadesApi) => {
         const atividadesNormalizadas = atividadesApi.map((atividade) => this.normalizarAtividade(atividade));
         this.atividadesInterno.set(atividadesNormalizadas);
+        atividadesNormalizadas.forEach((atividade) => this.carregarHistoricoAtividade(atividade.id));
       },
       error: (erro) => {
         console.error('Falha ao carregar atividades da API.', erro);
@@ -349,6 +363,7 @@ export class AtividadesService {
     this.http.get<Atividade>(`${this.urlAtividades}/${atividadeId}`).subscribe({
       next: (atividadeApi) => {
         this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+        this.carregarHistoricoAtividade(atividadeId);
       },
       error: (erro) => {
         console.error('Falha ao recarregar atividade na API.', erro);
@@ -405,6 +420,20 @@ export class AtividadesService {
       }
 
       return listaAtual.map((atividade) => (atividade.id === atividadeNormalizada.id ? atividadeNormalizada : atividade));
+    });
+  }
+
+  private carregarHistoricoAtividade(atividadeId: string): void {
+    this.http.get<HistoricoAtividade[]>(`${this.urlAtividades}/${atividadeId}/historico`).subscribe({
+      next: (historico) => {
+        this.historicosAtividadeInterno.update((estadoAtual) => ({
+          ...estadoAtual,
+          [atividadeId]: historico,
+        }));
+      },
+      error: (erro) => {
+        console.error('Falha ao carregar histórico da atividade na API.', erro);
+      },
     });
   }
 

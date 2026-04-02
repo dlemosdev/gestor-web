@@ -4,10 +4,14 @@ export interface Projeto {
   id: string;
   nome: string;
   descricao: string;
-  cor?: string;
   principal: boolean;
+  dataInicial: string | null;
+  dataFinal: string | null;
   criadoEm: string;
   atualizadoEm: string;
   status: StatusProjeto;
+  inativadoEm: string | null;
+  concluidoEm: string | null;
+  reativadoEm: string | null;
 }
 

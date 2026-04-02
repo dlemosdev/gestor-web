@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { Projeto } from '../../../../models/projeto.model';
 import { EstadoVazioUiComponent } from '../../../../shared/ui/estado-vazio/estado-vazio-ui.component';
@@ -20,9 +20,12 @@ import { CardProjetoComponent } from '../card-projeto/card-projeto.component';
         @for (projeto of projetos(); track projeto.id) {
           <app-card-projeto
             [projeto]="projeto"
+            (visualizarDetalhes)="visualizarDetalhes.emit($event)"
             (editarProjeto)="editarProjeto.emit($event)"
             (alternarProjetoPrincipal)="alternarProjetoPrincipal.emit($event)"
-            (solicitarExclusaoProjeto)="solicitarExclusaoProjeto.emit($event)"
+            (inativarProjeto)="inativarProjeto.emit($event)"
+            (concluirProjeto)="concluirProjeto.emit($event)"
+            (ativarProjeto)="ativarProjeto.emit($event)"
           />
         }
       </section>
@@ -32,9 +35,10 @@ import { CardProjetoComponent } from '../card-projeto/card-projeto.component';
 export class ListaProjetosComponent {
   readonly projetos = input.required<Projeto[]>();
 
+  readonly visualizarDetalhes = output<Projeto>();
   readonly editarProjeto = output<Projeto>();
   readonly alternarProjetoPrincipal = output<Projeto>();
-  readonly solicitarExclusaoProjeto = output<Projeto>();
+  readonly inativarProjeto = output<Projeto>();
+  readonly concluirProjeto = output<Projeto>();
+  readonly ativarProjeto = output<Projeto>();
 }
-
-
