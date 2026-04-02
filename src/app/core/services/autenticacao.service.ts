@@ -2,12 +2,17 @@
 import { Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { apiUrlBase } from '../config/api.config';
 import { Usuario } from '../../models/usuario.model';
+import { apiUrlBase } from '../config/api.config';
 
 interface RespostaAutenticacao {
   tokenAcesso: string;
   usuario: Usuario;
+}
+
+interface RespostaLoginDoisFatores {
+  requerSegundoFator: boolean;
+  tokenDesafio: string;
 }
 
 @Injectable({
@@ -28,11 +33,27 @@ export class AutenticacaoService {
 
   constructor(private readonly http: HttpClient) {}
 
-  async iniciarSessao(email: string, senha: string): Promise<void> {
+  async solicitarCodigoSegundoFator(email: string, senha: string): Promise<string> {
     const resposta = await firstValueFrom(
-      this.http.post<RespostaAutenticacao>(
+      this.http.post<RespostaLoginDoisFatores>(
         `${this.urlAutenticacao}/login`,
         { email: email.trim().toLowerCase(), senha },
+        { withCredentials: true },
+      ),
+    );
+
+    if (!resposta.requerSegundoFator || !resposta.tokenDesafio) {
+      throw new Error('Resposta de autenticação inválida.');
+    }
+
+    return resposta.tokenDesafio;
+  }
+
+  async validarSegundoFator(tokenDesafio: string, codigo: string): Promise<void> {
+    const resposta = await firstValueFrom(
+      this.http.post<RespostaAutenticacao>(
+        `${this.urlAutenticacao}/2fa/validar`,
+        { tokenDesafio, codigo },
         { withCredentials: true },
       ),
     );

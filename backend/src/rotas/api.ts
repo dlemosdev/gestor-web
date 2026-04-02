@@ -152,8 +152,7 @@ roteador.get(
   tratarAssincrono(async (req, res) => {
     const projeto = await obter<ProjetoBanco>('SELECT * FROM projetos WHERE id = ?', [req.params.id]);
     if (!projeto) {
-      res.status(404).json({ mensagem: 'Projeto não encontrado.' });
-      return;
+      throw new ApiErro('Projeto nao encontrado.', 404);
     }
     res.json(mapearProjeto(projeto));
   }),
@@ -185,8 +184,7 @@ roteador.put(
   tratarAssincrono(async (req, res) => {
     const projetoExistente = await obter<ProjetoBanco>('SELECT * FROM projetos WHERE id = ?', [req.params.id]);
     if (!projetoExistente) {
-      res.status(404).json({ mensagem: 'Projeto não encontrado.' });
-      return;
+      throw new ApiErro('Projeto nao encontrado.', 404);
     }
 
     const dados = req.body as AtualizarProjetoPayload;
@@ -212,8 +210,7 @@ roteador.patch(
   tratarAssincrono(async (req, res) => {
     const projetoExistente = await obter<ProjetoBanco>('SELECT * FROM projetos WHERE id = ?', [req.params.id]);
     if (!projetoExistente) {
-      res.status(404).json({ mensagem: 'Projeto não encontrado.' });
-      return;
+      throw new ApiErro('Projeto nao encontrado.', 404);
     }
 
     await transacao(async () => {
@@ -231,8 +228,7 @@ roteador.delete(
   tratarAssincrono(async (req, res) => {
     const projeto = await obter<ProjetoBanco>('SELECT * FROM projetos WHERE id = ?', [req.params.id]);
     if (!projeto) {
-      res.status(404).json({ mensagem: 'Projeto não encontrado.' });
-      return;
+      throw new ApiErro('Projeto nao encontrado.', 404);
     }
 
     await executar('DELETE FROM projetos WHERE id = ?', [req.params.id]);
@@ -293,8 +289,7 @@ roteador.put(
   tratarAssincrono(async (req, res) => {
     const raia = await obter<RaiaBanco>('SELECT * FROM raias WHERE id = ?', [req.params.id]);
     if (!raia) {
-      res.status(404).json({ mensagem: 'Raia não encontrada.' });
-      return;
+      throw new ApiErro('Raia nao encontrada.', 404);
     }
 
     const dados = req.body as AtualizarRaiaPayload;
@@ -337,8 +332,7 @@ roteador.delete(
   tratarAssincrono(async (req, res) => {
     const raia = await obter<RaiaBanco>('SELECT * FROM raias WHERE id = ?', [req.params.id]);
     if (!raia) {
-      res.status(404).json({ mensagem: 'Raia não encontrada.' });
-      return;
+      throw new ApiErro('Raia nao encontrada.', 404);
     }
 
     await executar('DELETE FROM raias WHERE id = ?', [req.params.id]);
@@ -373,8 +367,7 @@ roteador.get(
   tratarAssincrono(async (req, res) => {
     const atividade = await obter<AtividadeBanco>('SELECT * FROM atividades WHERE id = ?', [req.params.id]);
     if (!atividade) {
-      res.status(404).json({ mensagem: 'Atividade não encontrada.' });
-      return;
+      throw new ApiErro('Atividade nao encontrada.', 404);
     }
     res.json(mapearAtividade(atividade));
   }),
@@ -432,8 +425,7 @@ roteador.put(
   tratarAssincrono(async (req, res) => {
     const atividade = await obter<AtividadeBanco>('SELECT * FROM atividades WHERE id = ?', [req.params.id]);
     if (!atividade) {
-      res.status(404).json({ mensagem: 'Atividade não encontrada.' });
-      return;
+      throw new ApiErro('Atividade nao encontrada.', 404);
     }
 
     const dados = req.body as AtualizarAtividadePayload;
@@ -486,8 +478,7 @@ roteador.patch(
 
     const atividade = await obter<AtividadeBanco>('SELECT * FROM atividades WHERE id = ?', [req.params.id]);
     if (!atividade) {
-      res.status(404).json({ mensagem: 'Atividade não encontrada.' });
-      return;
+      throw new ApiErro('Atividade nao encontrada.', 404);
     }
 
     res.json(mapearAtividade(atividade));
@@ -502,8 +493,7 @@ roteador.post(
 
     const atividade = await obter<AtividadeBanco>('SELECT * FROM atividades WHERE id = ?', [req.params.id]);
     if (!atividade) {
-      res.status(404).json({ mensagem: 'Atividade não encontrada.' });
-      return;
+      throw new ApiErro('Atividade nao encontrada.', 404);
     }
 
     const comentarios = jsonSeguroParse<Comentario[]>(atividade.comentarios_json, []);
@@ -531,8 +521,7 @@ roteador.delete(
   tratarAssincrono(async (req, res) => {
     const atividade = await obter<AtividadeBanco>('SELECT * FROM atividades WHERE id = ?', [req.params.id]);
     if (!atividade) {
-      res.status(404).json({ mensagem: 'Atividade não encontrada.' });
-      return;
+      throw new ApiErro('Atividade nao encontrada.', 404);
     }
 
     await executar('DELETE FROM atividades WHERE id = ?', [req.params.id]);

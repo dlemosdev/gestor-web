@@ -127,10 +127,28 @@ export async function criarTabelas(): Promise<void> {
     )
   `);
 
+  await executar(`
+    CREATE TABLE IF NOT EXISTS desafios_2fa (
+      id TEXT PRIMARY KEY,
+      usuario_id TEXT NOT NULL,
+      codigo_hash TEXT NOT NULL,
+      tentativas_falha INTEGER NOT NULL DEFAULT 0,
+      expira_em TEXT NOT NULL,
+      consumido_em TEXT,
+      ip_origem TEXT,
+      user_agent TEXT,
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    )
+  `);
+
   await executar('CREATE INDEX IF NOT EXISTS idx_raias_projeto_ordem ON raias(projeto_id, ordem)');
   await executar('CREATE INDEX IF NOT EXISTS idx_atividades_projeto ON atividades(projeto_id)');
   await executar('CREATE INDEX IF NOT EXISTS idx_atividades_raia_ordem ON atividades(raia_id, ordem)');
   await executar('CREATE INDEX IF NOT EXISTS idx_sessoes_auth_usuario ON sessoes_auth(usuario_id)');
+  await executar('CREATE INDEX IF NOT EXISTS idx_desafios_2fa_usuario ON desafios_2fa(usuario_id)');
+  await executar('CREATE INDEX IF NOT EXISTS idx_desafios_2fa_expira ON desafios_2fa(expira_em)');
 }
 
 async function garantirUsuariosAuth(): Promise<void> {

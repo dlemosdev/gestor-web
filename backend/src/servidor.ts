@@ -6,7 +6,7 @@ import { autenticarRequisicao } from './autenticacao/middleware-autenticacao';
 import { inicializarBanco } from './banco/inicializar-banco';
 import { roteadorAutenticacao } from './rotas/autenticacao';
 import { roteador } from './rotas/api';
-import { ApiErro } from './tipos/erros';
+import { ApiErro, responderProblema } from './tipos/erros';
 
 const porta = Number(process.env.PORTA_API || 3333);
 const origemFrontend = process.env.ORIGEM_FRONTEND || 'http://localhost:4200';
@@ -27,13 +27,23 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', roteadorAutenticacao);
+app.use('/api/auth', (req, _res, next) => {
+  next(new ApiErro('Recurso nao encontrado.', 404));
+});
 app.use('/api', autenticarRequisicao, roteador);
 
-app.use((erro: Error, _req: Request, res: Response, _next: NextFunction) => {
-  const erroApi = erro as Partial<ApiErro>;
-  res.status(erroApi.statusCode ?? 500).json({
-    mensagem: erro.message || 'Erro interno do servidor.',
-  });
+app.use('/api', (req, _res, next) => {
+  next(new ApiErro('Recurso nao encontrado.', 404));
+});
+
+app.use((erro: Error, req: Request, res: Response, _next: NextFunction) => {
+  if (erro instanceof ApiErro) {
+    responderProblema(req, res, erro);
+    return;
+  }
+
+  const erroInterno = new ApiErro('Erro interno do servidor.', 500);
+  responderProblema(req, res, erroInterno);
 });
 
 async function iniciarServidor(): Promise<void> {
@@ -41,7 +51,7 @@ async function iniciarServidor(): Promise<void> {
 
   app.listen(porta, () => {
     // eslint-disable-next-line no-console
-    console.log(`Gestor API disponível em http://localhost:${porta}`);
+    console.log(`Gestor API disponivel em http://localhost:${porta}`);
   });
 }
 

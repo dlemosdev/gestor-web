@@ -1,18 +1,23 @@
-import { Request, Response, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import bcrypt from 'bcryptjs';
+﻿import { randomInt, randomUUID } from 'node:crypto';
 
-import { executar, obter, transacao } from '../banco/conexao';
-import { ApiErro } from '../tipos/erros';
-import { agoraIso } from '../util/serializacao';
+import bcrypt from 'bcryptjs';
+import rateLimit from 'express-rate-limit';
+import { Request, Response, Router } from 'express';
+
 import {
   gerarIdentificadorSessao,
   gerarTokenAcesso,
+  gerarTokenDesafio,
   gerarTokenRefresh,
   hashToken,
   nomeCookieRefresh,
+  verificarTokenDesafio,
   verificarTokenRefresh,
 } from '../autenticacao/jwt';
+import { executar, obter, transacao } from '../banco/conexao';
+import { enviarCodigoSegundoFator } from '../notificacao/email';
+import { ApiErro, responderProblema } from '../tipos/erros';
+import { agoraIso } from '../util/serializacao';
 
 interface UsuarioAuthLinha {
   id: string;
@@ -32,9 +37,23 @@ interface SessaoAuthLinha {
   revogado_em: string | null;
 }
 
+interface DesafioDoisFatoresLinha {
+  id: string;
+  usuario_id: string;
+  codigo_hash: string;
+  tentativas_falha: number;
+  expira_em: string;
+  consumido_em: string | null;
+}
+
 interface LoginPayload {
   email: string;
   senha: string;
+}
+
+interface ValidarCodigoPayload {
+  tokenDesafio: string;
+  codigo: string;
 }
 
 interface UsuarioResposta {
@@ -46,13 +65,29 @@ interface UsuarioResposta {
 
 const minutosBloqueioFalha = 15;
 const limiteFalhas = 5;
+const limiteFalhasDesafio = 5;
+const validadeCodigoMinutos = 10;
+
+function criarRateLimitHandler(detail: string) {
+  return (req: Request, res: Response): void => {
+    responderProblema(req, res, new ApiErro(detail, 429));
+  };
+}
 
 const limiteLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { mensagem: 'Muitas tentativas de login. Tente novamente em alguns minutos.' },
+  handler: criarRateLimitHandler('Muitas tentativas de login. Tente novamente em alguns minutos.'),
+});
+
+const limiteValidacaoCodigo = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: criarRateLimitHandler('Muitas tentativas de validacao. Tente novamente em alguns minutos.'),
 });
 
 export const roteadorAutenticacao = Router();
@@ -102,6 +137,14 @@ function limparCookieRefresh(res: Response): void {
   });
 }
 
+function gerarCodigoSeisDigitos(): string {
+  return String(randomInt(0, 1_000_000)).padStart(6, '0');
+}
+
+function hashCodigoDesafio(desafioId: string, codigo: string): string {
+  return hashToken(`${desafioId}:${codigo}`);
+}
+
 async function registrarNovaSessao(
   usuario: UsuarioAuthLinha,
   req: Request,
@@ -111,7 +154,7 @@ async function registrarNovaSessao(
   const payloadRefresh = verificarTokenRefresh(tokenRefresh);
 
   if (!payloadRefresh.exp) {
-    throw new ApiErro('Falha ao criar sessão.', 500);
+    throw new ApiErro('Falha ao criar sessao.', 500);
   }
 
   await executar(
@@ -145,6 +188,16 @@ async function buscarUsuarioPorEmail(email: string): Promise<UsuarioAuthLinha | 
   );
 }
 
+async function buscarUsuarioPorId(usuarioId: string): Promise<UsuarioAuthLinha | null> {
+  return obter<UsuarioAuthLinha>(
+    `SELECT u.id, u.nome, u.email, u.iniciais, a.senha_hash, a.tentativas_falha, a.bloqueado_ate
+     FROM usuarios u
+     JOIN usuarios_auth a ON a.usuario_id = u.id
+     WHERE u.id = ?`,
+    [usuarioId],
+  );
+}
+
 async function incrementarTentativasFalha(usuario: UsuarioAuthLinha): Promise<void> {
   const proximaTentativa = usuario.tentativas_falha + 1;
   const bloqueadoAte =
@@ -169,6 +222,34 @@ async function resetarTentativasFalha(usuarioId: string): Promise<void> {
   );
 }
 
+async function criarDesafioDoisFatores(usuario: UsuarioAuthLinha, req: Request): Promise<{ tokenDesafio: string }> {
+  const desafioId = randomUUID();
+  const codigo = gerarCodigoSeisDigitos();
+  const expiraEm = new Date(Date.now() + validadeCodigoMinutos * 60 * 1000).toISOString();
+
+  await executar(
+    `INSERT INTO desafios_2fa (
+      id, usuario_id, codigo_hash, tentativas_falha, expira_em, consumido_em, ip_origem, user_agent, criado_em, atualizado_em
+    ) VALUES (?, ?, ?, 0, ?, NULL, ?, ?, ?, ?)`,
+    [
+      desafioId,
+      usuario.id,
+      hashCodigoDesafio(desafioId, codigo),
+      expiraEm,
+      obterIpRequisicao(req),
+      String(req.headers['user-agent'] ?? '').slice(0, 255),
+      agoraIso(),
+      agoraIso(),
+    ],
+  );
+
+  await enviarCodigoSegundoFator(usuario.email, usuario.nome, codigo, validadeCodigoMinutos);
+
+  return {
+    tokenDesafio: gerarTokenDesafio(usuario.id, usuario.email, desafioId),
+  };
+}
+
 roteadorAutenticacao.post('/login', limiteLogin, async (req, res, next) => {
   try {
     const dados = req.body as Partial<LoginPayload>;
@@ -176,12 +257,12 @@ roteadorAutenticacao.post('/login', limiteLogin, async (req, res, next) => {
     const senha = String(dados.senha ?? '');
 
     if (!email || !senha) {
-      throw new ApiErro('Credenciais inválidas.', 401);
+      throw new ApiErro('Credenciais invalidas.', 401);
     }
 
     const usuario = await buscarUsuarioPorEmail(email);
     if (!usuario) {
-      throw new ApiErro('Credenciais inválidas.', 401);
+      throw new ApiErro('Credenciais invalidas.', 401);
     }
 
     if (usuario.bloqueado_ate && new Date(usuario.bloqueado_ate).getTime() > Date.now()) {
@@ -191,12 +272,72 @@ roteadorAutenticacao.post('/login', limiteLogin, async (req, res, next) => {
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
     if (!senhaValida) {
       await incrementarTentativasFalha(usuario);
-      throw new ApiErro('Credenciais inválidas.', 401);
+      throw new ApiErro('Credenciais invalidas.', 401);
     }
 
-    await resetarTentativasFalha(usuario.id);
+    const desafio = await criarDesafioDoisFatores(usuario, req);
 
-    const sessao = await registrarNovaSessao(usuario, req);
+    res.json({
+      requerSegundoFator: true,
+      tokenDesafio: desafio.tokenDesafio,
+    });
+  } catch (erro) {
+    next(erro);
+  }
+});
+
+roteadorAutenticacao.post('/2fa/validar', limiteValidacaoCodigo, async (req, res, next) => {
+  try {
+    const dados = req.body as Partial<ValidarCodigoPayload>;
+    const tokenDesafio = String(dados.tokenDesafio ?? '');
+    const codigo = String(dados.codigo ?? '').replace(/\D/g, '');
+
+    if (!tokenDesafio || codigo.length !== 6) {
+      throw new ApiErro('Codigo invalido.', 400);
+    }
+
+    const payload = verificarTokenDesafio(tokenDesafio);
+    if (payload.tipo !== 'desafio' || !payload.usuarioId || !payload.email || !payload.desafioId) {
+      throw new ApiErro('Desafio de autenticacao invalido.', 401);
+    }
+
+    const desafio = await obter<DesafioDoisFatoresLinha>(
+      `SELECT id, usuario_id, codigo_hash, tentativas_falha, expira_em, consumido_em
+       FROM desafios_2fa
+       WHERE id = ? AND usuario_id = ?`,
+      [payload.desafioId, payload.usuarioId],
+    );
+
+    if (!desafio || desafio.consumido_em || new Date(desafio.expira_em).getTime() <= Date.now()) {
+      throw new ApiErro('Codigo expirado ou invalido.', 401);
+    }
+
+    const hashInformado = hashCodigoDesafio(desafio.id, codigo);
+    if (hashInformado !== desafio.codigo_hash) {
+      const proximaTentativa = desafio.tentativas_falha + 1;
+      const consumidoEm = proximaTentativa >= limiteFalhasDesafio ? agoraIso() : null;
+
+      await executar(
+        `UPDATE desafios_2fa
+         SET tentativas_falha = ?, consumido_em = COALESCE(consumido_em, ?), atualizado_em = ?
+         WHERE id = ?`,
+        [proximaTentativa, consumidoEm, agoraIso(), desafio.id],
+      );
+
+      throw new ApiErro('Codigo invalido.', 401);
+    }
+
+    const usuario = await buscarUsuarioPorId(payload.usuarioId);
+    if (!usuario || normalizarEmail(usuario.email) !== normalizarEmail(payload.email)) {
+      throw new ApiErro('Usuario invalido para autenticacao.', 401);
+    }
+
+    const sessao = await transacao(async () => {
+      await executar('UPDATE desafios_2fa SET consumido_em = ?, atualizado_em = ? WHERE id = ?', [agoraIso(), agoraIso(), desafio.id]);
+      await resetarTentativasFalha(usuario.id);
+      return registrarNovaSessao(usuario, req);
+    });
+
     definirCookieRefresh(res, sessao.tokenRefresh);
 
     res.json({
@@ -212,12 +353,12 @@ roteadorAutenticacao.post('/refresh', async (req, res, next) => {
   try {
     const tokenRefreshAtual = req.cookies?.[nomeCookieRefresh] as string | undefined;
     if (!tokenRefreshAtual) {
-      throw new ApiErro('Sessão inválida.', 401);
+      throw new ApiErro('Sessao invalida.', 401);
     }
 
     const payload = verificarTokenRefresh(tokenRefreshAtual);
     if (payload.tipo !== 'refresh' || !payload.usuarioId || !payload.email) {
-      throw new ApiErro('Sessão inválida.', 401);
+      throw new ApiErro('Sessao invalida.', 401);
     }
 
     const hashAtual = hashToken(tokenRefreshAtual);
@@ -229,12 +370,12 @@ roteadorAutenticacao.post('/refresh', async (req, res, next) => {
     );
 
     if (!sessao || sessao.revogado_em || new Date(sessao.expira_em).getTime() <= Date.now()) {
-      throw new ApiErro('Sessão inválida.', 401);
+      throw new ApiErro('Sessao invalida.', 401);
     }
 
-    const usuario = await buscarUsuarioPorEmail(payload.email);
-    if (!usuario || usuario.id !== payload.usuarioId) {
-      throw new ApiErro('Sessão inválida.', 401);
+    const usuario = await buscarUsuarioPorId(payload.usuarioId);
+    if (!usuario || normalizarEmail(usuario.email) !== normalizarEmail(payload.email)) {
+      throw new ApiErro('Sessao invalida.', 401);
     }
 
     const novaSessao = await transacao(async () => {
