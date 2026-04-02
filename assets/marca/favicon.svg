@@ -1,0 +1,13 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gestor">
+  <defs>
+    <linearGradient id="gestorGrad" x1="24" y1="24" x2="176" y2="176" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="152" height="152" rx="36" fill="#0F172A"/>
+  <rect x="52" y="56" width="96" height="16" rx="8" fill="#F1F5F9" fill-opacity="0.96"/>
+  <rect x="52" y="92" width="72" height="16" rx="8" fill="#F1F5F9" fill-opacity="0.96"/>
+  <rect x="52" y="128" width="96" height="16" rx="8" fill="#F1F5F9" fill-opacity="0.2"/>
+  <path d="M148 92H118C108.611 92 101 99.6112 101 109C101 118.389 108.611 126 118 126H148" stroke="url(#gestorGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
