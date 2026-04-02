@@ -1,11 +1,20 @@
 ﻿import { Routes } from '@angular/router';
 
+import { guardAutenticacao } from './core/guards/guard-autenticacao';
+import { guardPaginaLogin } from './core/guards/guard-pagina-login';
 import { ShellComponent } from './layout/shell/shell.component';
 
 export const rotasAplicacao: Routes = [
   {
+    path: 'login',
+    canActivate: [guardPaginaLogin],
+    loadComponent: () =>
+      import('./features/autenticacao/paginas/login-pagina.component').then((modulo) => modulo.LoginPaginaComponent),
+  },
+  {
     path: '',
     component: ShellComponent,
+    canActivate: [guardAutenticacao],
     children: [
       {
         path: '',
@@ -40,4 +49,3 @@ export const rotasAplicacao: Routes = [
     redirectTo: 'dashboard',
   },
 ];
-

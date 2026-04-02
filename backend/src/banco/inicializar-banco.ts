@@ -1,6 +1,8 @@
 ﻿import { randomUUID } from 'node:crypto';
 
-import { executar, obter } from './conexao';
+import bcrypt from 'bcryptjs';
+
+import { executar, listar, obter } from './conexao';
 import { agoraIso } from '../util/serializacao';
 
 interface DadosIniciaisProjeto {
@@ -46,6 +48,19 @@ export async function criarTabelas(): Promise<void> {
       iniciais TEXT NOT NULL,
       criado_em TEXT NOT NULL,
       atualizado_em TEXT NOT NULL
+    )
+  `);
+
+  await executar(`
+    CREATE TABLE IF NOT EXISTS usuarios_auth (
+      usuario_id TEXT PRIMARY KEY,
+      senha_hash TEXT NOT NULL,
+      tentativas_falha INTEGER NOT NULL DEFAULT 0,
+      bloqueado_ate TEXT,
+      ultimo_login_em TEXT,
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
     )
   `);
 
@@ -96,16 +111,55 @@ export async function criarTabelas(): Promise<void> {
       FOREIGN KEY (raia_id) REFERENCES raias(id) ON DELETE CASCADE
     )
   `);
+
+  await executar(`
+    CREATE TABLE IF NOT EXISTS sessoes_auth (
+      id TEXT PRIMARY KEY,
+      usuario_id TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      expira_em TEXT NOT NULL,
+      revogado_em TEXT,
+      ip_origem TEXT,
+      user_agent TEXT,
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    )
+  `);
+
+  await executar('CREATE INDEX IF NOT EXISTS idx_raias_projeto_ordem ON raias(projeto_id, ordem)');
+  await executar('CREATE INDEX IF NOT EXISTS idx_atividades_projeto ON atividades(projeto_id)');
+  await executar('CREATE INDEX IF NOT EXISTS idx_atividades_raia_ordem ON atividades(raia_id, ordem)');
+  await executar('CREATE INDEX IF NOT EXISTS idx_sessoes_auth_usuario ON sessoes_auth(usuario_id)');
+}
+
+async function garantirUsuariosAuth(): Promise<void> {
+  const agora = agoraIso();
+  const senhaPadraoInicial = process.env.SENHA_PADRAO_INICIAL ?? 'Gestor@123';
+  const hashSenhaPadrao = await bcrypt.hash(senhaPadraoInicial, 12);
+  const usuarios = await listar<{ id: string }>('SELECT id FROM usuarios');
+
+  if (usuarios.length === 0) {
+    return;
+  }
+
+  await executar(
+    `INSERT OR IGNORE INTO usuarios_auth (
+      usuario_id, senha_hash, tentativas_falha, bloqueado_ate, ultimo_login_em, criado_em, atualizado_em
+    )
+    SELECT id, ?, 0, NULL, NULL, ?, ? FROM usuarios`,
+    [hashSenhaPadrao, agora, agora],
+  );
 }
 
 export async function seedInicial(): Promise<void> {
   const projetoExistente = await obter<{ id: string }>('SELECT id FROM projetos LIMIT 1');
+  const agora = agoraIso();
 
   if (projetoExistente) {
+    await garantirUsuariosAuth();
     return;
   }
-
-  const agora = agoraIso();
 
   const usuarios = [
     { id: 'usuario-ana', nome: 'Ana Paula', email: 'ana.paula@empresa.com', iniciais: 'AP' },
@@ -121,6 +175,8 @@ export async function seedInicial(): Promise<void> {
       [usuario.id, usuario.nome, usuario.email, usuario.iniciais, agora, agora],
     );
   }
+
+  await garantirUsuariosAuth();
 
   const projetos: DadosIniciaisProjeto[] = [
     {

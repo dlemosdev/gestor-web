@@ -131,10 +131,6 @@ function tratarAssincrono(
   };
 }
 
-roteador.get('/health', (_req, res) => {
-  res.json({ status: 'ok', servico: 'gestor-api' });
-});
-
 roteador.get(
   '/usuarios',
   tratarAssincrono(async (_req, res) => {

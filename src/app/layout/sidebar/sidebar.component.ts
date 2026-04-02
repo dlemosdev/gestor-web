@@ -1,5 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+﻿import { Component, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
+import { AutenticacaoService } from '../../core/services/autenticacao.service';
 import { EstadoSidebarService } from '../../core/services/estado-sidebar.service';
 import { TemaAparenciaService } from '../../core/services/tema-aparencia.service';
 import { AvatarUiComponent } from '../../shared/ui/avatar/avatar-ui.component';
@@ -31,7 +33,7 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
           <app-item-sidebar-ui titulo="Projetos" rota="/projetos" icone="projetos" [compacto]="sidebarRecolhida()" />
         </nav>
 
-        <div class="mt-3 border-t border-borda pt-3">
+        <div class="mt-3 border-t border-borda pt-3 space-y-2">
           <button
             type="button"
             class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:border-borda-forte hover:bg-superficie hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
@@ -56,6 +58,25 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
               <span class="ml-2 text-sm font-semibold">{{ temaEscuroAtivo() ? 'Tema claro' : 'Tema escuro' }}</span>
             }
           </button>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            [class.w-full]="!sidebarRecolhida()"
+            [class.w-10]="sidebarRecolhida()"
+            aria-label="Sair da conta"
+            title="Sair"
+            (click)="sair()"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <path d="m16 17 5-5-5-5" />
+              <path d="M21 12H9" />
+            </svg>
+            @if (!sidebarRecolhida()) {
+              <span class="ml-2 text-sm font-semibold">Sair</span>
+            }
+          </button>
         </div>
       </div>
 
@@ -66,11 +87,11 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
         [class.p-2.5]="sidebarRecolhida()"
         [class.p-3.5]="!sidebarRecolhida()"
       >
-        <app-avatar-ui iniciais="DL" textoAlternativo="Avatar do usuario logado" />
+        <app-avatar-ui [iniciais]="usuarioIniciais()" textoAlternativo="Avatar do usuario logado" />
         @if (!sidebarRecolhida()) {
           <div>
-            <p class="text-sm font-semibold text-cor-texto">Denner Lemos</p>
-            <p class="text-xs text-cor-texto-secundaria">Administrador</p>
+            <p class="text-sm font-semibold text-cor-texto">{{ usuarioNome() }}</p>
+            <p class="text-xs text-cor-texto-secundaria">{{ usuarioEmail() }}</p>
           </div>
         }
       </footer>
@@ -80,11 +101,21 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
 export class SidebarComponent {
   private readonly estadoSidebarService = inject(EstadoSidebarService);
   private readonly temaAparenciaService = inject(TemaAparenciaService);
+  private readonly autenticacaoService = inject(AutenticacaoService);
+  private readonly roteador = inject(Router);
 
   readonly sidebarRecolhida = computed(() => this.estadoSidebarService.sidebarRecolhida());
   readonly temaEscuroAtivo = computed(() => this.temaAparenciaService.temaAtual() === 'escuro');
+  readonly usuarioNome = computed(() => this.autenticacaoService.usuarioAutenticado()?.nome ?? 'Usuário');
+  readonly usuarioEmail = computed(() => this.autenticacaoService.usuarioAutenticado()?.email ?? '');
+  readonly usuarioIniciais = computed(() => this.autenticacaoService.usuarioAutenticado()?.iniciais ?? 'U');
 
   alternarTemaAparencia(): void {
     this.temaAparenciaService.alternarTema();
+  }
+
+  async sair(): Promise<void> {
+    await this.autenticacaoService.encerrarSessao();
+    await this.roteador.navigateByUrl('/login');
   }
 }

@@ -10,14 +10,21 @@
     "dev": "tsx watch src/servidor.ts"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
     "gestor": "file:..",
+    "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.15.17",
     "tsx": "^4.19.4",
     "typescript": "^5.9.2"
