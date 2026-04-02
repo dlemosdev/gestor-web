@@ -7,9 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "api:install": "npm --prefix backend install",
-    "api:start": "npm --prefix backend run start",
-    "api:dev": "npm --prefix backend run dev"
+    "api:install": "npm --prefix ../gestor-api install",
+    "api:start": "npm --prefix ../gestor-api run start",
+    "api:dev": "npm --prefix ../gestor-api run dev"
   },
   "private": true,
   "dependencies": {

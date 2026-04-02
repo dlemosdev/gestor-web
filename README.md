@@ -33,16 +33,16 @@ Referências de experiência: Jira, Linear, Trello e ClickUp, com adaptação pa
   - armazenamento via `localStorage`
   - seed inicial automático com dados mockados
 
-## API backend (Node + Express + SQLite)
+## API Node (Express + SQLite)
 
-Agora o projeto também possui uma API REST em `backend/` para suportar a evolução do frontend para modo cliente-servidor.
+A API REST foi separada em um projeto independente (`gestor-api`) para versionamento e deploy desacoplados do frontend.
 
 - Stack:
   - Node.js
   - Express
   - SQLite
 - Banco:
-  - arquivo local em `backend/dados.db`
+  - arquivo local em `../gestor-api/dados.db` (quando os projetos estão lado a lado)
   - criação automática de schema + seed inicial
 - Cobertura REST:
   - usuários
@@ -136,7 +136,7 @@ http://localhost:4200
 
 ### Executar API local
 
-1. Instalar dependências da API:
+1. Instalar dependências da API (projeto irmão):
 
 ```bash
 npm run api:install
@@ -160,9 +160,9 @@ http://localhost:3333/api
 - `npm run build`: gera build de produção
 - `npm run watch`: build em modo watch
 - `npm test`: executa testes
-- `npm run api:install`: instala dependências do backend
-- `npm run api:start`: inicia API backend
-- `npm run api:dev`: inicia API backend em modo watch
+- `npm run api:install`: instala dependências da API
+- `npm run api:start`: inicia API
+- `npm run api:dev`: inicia API em modo watch
 
 ## Build de produção
 
