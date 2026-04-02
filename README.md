@@ -1,4 +1,4 @@
-﻿# Gestor
+# Gestor
 
 Aplicação web SaaS para gestão visual de projetos e atividades em formato Kanban, com foco em produtividade, UX corporativa e arquitetura frontend escalável.
 
@@ -112,20 +112,20 @@ A aplicação funciona sem backend real neste estágio.
 ## Requisitos
 
 - Node.js 22+
-- npm 10+
+- pnpm 10+
 
 ## Como executar localmente
 
 1. Instalar dependências:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Rodar ambiente de desenvolvimento:
 
 ```bash
-npm start
+pnpm start
 ```
 
 3. Acessar no navegador:
@@ -139,13 +139,13 @@ http://localhost:4200
 1. Instalar dependências da API (projeto irmão):
 
 ```bash
-npm run api:install
+pnpm run api:install
 ```
 
 2. Subir API:
 
 ```bash
-npm run api:start
+pnpm run api:start
 ```
 
 3. Endpoint base:
@@ -156,18 +156,18 @@ http://localhost:3333/api
 
 ## Scripts disponíveis
 
-- `npm start`: sobe o servidor de desenvolvimento
-- `npm run build`: gera build de produção
-- `npm run watch`: build em modo watch
-- `npm test`: executa testes
-- `npm run api:install`: instala dependências da API
-- `npm run api:start`: inicia API
-- `npm run api:dev`: inicia API em modo watch
+- `pnpm start`: sobe o servidor de desenvolvimento
+- `pnpm run build`: gera build de produção
+- `pnpm run watch`: build em modo watch
+- `pnpm test`: executa testes
+- `pnpm run api:install`: instala dependências da API
+- `pnpm run api:start`: inicia API
+- `pnpm run api:dev`: inicia API em modo watch
 
 ## Build de produção
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Saída em:
@@ -198,3 +198,4 @@ dist/gestor
 ## Licença
 
 Uso interno/projeto privado (ajustar conforme política da organização).
+

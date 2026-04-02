@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "gestor",
   "version": "0.0.0",
   "scripts": {
@@ -7,9 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "api:install": "npm --prefix ../gestor-api install",
-    "api:start": "npm --prefix ../gestor-api run start",
-    "api:dev": "npm --prefix ../gestor-api run dev"
+    "api:install": "pnpm --dir ../gestor-api install",
+    "api:start": "pnpm --dir ../gestor-api start",
+    "api:dev": "pnpm --dir ../gestor-api dev"
   },
   "private": true,
   "dependencies": {
@@ -34,6 +34,6 @@
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
-  }
+  },
+  "packageManager": "pnpm@10.0.0"
 }
-
