@@ -30,7 +30,7 @@ export interface RaiaComAtividades {
     } @else {
       <section class="flex h-full min-h-0 flex-col pt-2" aria-label="Quadro de raias">
         <div
-          class="lista-raias flex h-full min-h-0 flex-1 items-stretch gap-5 overflow-x-auto overflow-y-hidden px-2 pb-0 snap-x snap-proximity"
+          class="lista-raias flex h-full min-h-0 flex-1 items-stretch gap-3 overflow-x-auto overflow-y-hidden px-2 pb-0 snap-x snap-proximity lg:gap-2.5 lg:overflow-x-hidden"
           cdkDropList
           cdkDropListOrientation="horizontal"
           [cdkDropListAutoScrollStep]="24"
@@ -39,7 +39,11 @@ export interface RaiaComAtividades {
           aria-label="Lista horizontal de raias"
         >
           @for (item of raiasComAtividades(); track item.raia.id) {
-            <div cdkDrag cdkDragLockAxis="x" class="relative h-full snap-start flex-none pb-2">
+            <div
+              cdkDrag
+              cdkDragLockAxis="x"
+              class="relative h-full w-[82vw] min-w-[260px] max-w-[340px] snap-start flex-none pb-2 lg:w-auto lg:min-w-0 lg:max-w-none lg:flex-1 lg:basis-0"
+            >
               <app-raia-coluna
                 [raia]="item.raia"
                 [atividades]="item.atividades"
@@ -62,6 +66,13 @@ export interface RaiaComAtividades {
       scroll-behavior: smooth;
       scroll-padding-left: 0.5rem;
       scroll-padding-right: 0.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .lista-raias {
+        scroll-padding-left: 0;
+        scroll-padding-right: 0;
+      }
     }
 
     .lista-raias.cdk-drop-list-dragging > div:not(.cdk-drag-placeholder) {

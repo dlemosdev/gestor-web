@@ -87,11 +87,11 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
         [class.p-2.5]="sidebarRecolhida()"
         [class.p-3.5]="!sidebarRecolhida()"
       >
-        <app-avatar-ui [iniciais]="usuarioIniciais()" textoAlternativo="Avatar do usuario logado" />
+        <app-avatar-ui class="shrink-0" [iniciais]="usuarioIniciais()" textoAlternativo="Avatar do usuario logado" />
         @if (!sidebarRecolhida()) {
-          <div>
-            <p class="text-sm font-semibold text-cor-texto">{{ usuarioNome() }}</p>
-            <p class="text-xs text-cor-texto-secundaria">{{ usuarioEmail() }}</p>
+          <div class="min-w-0 flex-1 overflow-hidden">
+            <p class="truncate text-sm font-semibold text-cor-texto">{{ usuarioNome() }}</p>
+            <p class="truncate text-xs text-cor-texto-secundaria">{{ usuarioEmail() }}</p>
           </div>
         }
       </footer>

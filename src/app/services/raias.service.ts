@@ -10,6 +10,7 @@ import { Raia } from '../models/raia.model';
 })
 export class RaiasService {
   private readonly urlRaias = `${apiUrlBase}/raias`;
+  private readonly nomesPadrao = ['Backlog', 'Em andamento', 'Teste', 'Aguardando publicacao', 'Concluidas'];
 
   private readonly raiasInterno = signal<Raia[]>([]);
   readonly raias = this.raiasInterno.asReadonly();
@@ -34,8 +35,7 @@ export class RaiasService {
           return;
         }
 
-        const nomesPadrao = ['Backlog', 'Em andamento', 'Bloqueadas', 'Concluidas'];
-        const criacoes = nomesPadrao.map((nome) =>
+        const criacoes = this.nomesPadrao.map((nome) =>
           this.http.post<Raia>(`${apiUrlBase}/projetos/${projetoId}/raias`, {
             nome,
             cor: null,

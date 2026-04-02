@@ -59,6 +59,8 @@ export class BotaoUiComponent {
       perigo: 'border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20',
     };
 
-    return `${classesBase} ${mapaTamanho[this.tamanho()]} ${mapaVariante[this.variante()]}`;
+    const classeLargura = this.larguraTotal() ? 'w-full' : '';
+
+    return `${classesBase} ${mapaTamanho[this.tamanho()]} ${mapaVariante[this.variante()]} ${classeLargura}`;
   });
 }

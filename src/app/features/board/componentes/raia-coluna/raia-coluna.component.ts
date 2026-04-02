@@ -18,7 +18,7 @@ export interface EventoSoltarAtividade {
   imports: [DragDropModule, EstadoVazioUiComponent, CardAtividadeComponent, DialogoConfirmacaoUiComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="flex h-full w-[85vw] max-w-[340px] min-w-[290px] flex-col rounded-2xl border border-borda bg-superficie p-3 sm:w-[330px]" [attr.aria-label]="'Raia ' + raia().nome">
+    <section class="flex h-full min-w-0 w-full flex-col rounded-2xl border border-borda bg-superficie p-3" [attr.aria-label]="'Raia ' + raia().nome">
       <header
         cdkDragHandle
         class="mb-3 flex cursor-grab items-center justify-between gap-2 rounded-lg active:cursor-grabbing"
@@ -37,7 +37,7 @@ export interface EventoSoltarAtividade {
         } @else {
           <button
             type="button"
-            class="truncate text-left text-sm font-semibold text-cor-texto"
+            class="min-w-0 flex-1 truncate text-left text-sm font-semibold text-cor-texto"
             (click)="modoEdicaoNome.set(true)"
             [attr.aria-label]="'Editar nome da raia ' + raia().nome"
           >

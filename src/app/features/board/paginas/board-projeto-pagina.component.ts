@@ -114,7 +114,7 @@ export class BoardProjetoPaginaComponent {
   private readonly atividadesService = inject(AtividadesService);
   private readonly usuariosService = inject(UsuariosService);
 
-  private readonly idProjetoRota = this.rotaAtiva.snapshot.paramMap.get('id') ?? 'projeto-portal-corporativo';
+  private readonly idProjetoRota = this.rotaAtiva.snapshot.paramMap.get('id') ?? '';
 
   readonly filtros = signal<FiltrosBoard>({
     busca: '',
@@ -380,7 +380,7 @@ export class BoardProjetoPaginaComponent {
 
     this.atividadeSelecionadaId.set(null);
     this.atividadeRascunho.set({
-      id: 'rascunho-atividade',
+      id: crypto.randomUUID(),
       projetoId: this.idProjetoRota,
       raiaId: primeiraRaia.id,
       titulo: '',
