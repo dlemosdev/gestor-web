@@ -4,6 +4,7 @@ import { Injectable, signal } from '@angular/core';
 import { apiUrlBase } from '../core/config/api.config';
 import { StatusProjeto } from '../models/enums/status-projeto.enum';
 import { Projeto } from '../models/projeto.model';
+import { RaiaPadraoProjeto } from '../models/raias-padrao-projeto';
 import { AtividadesService } from './atividades.service';
 import { RaiasService } from './raias.service';
 
@@ -36,16 +37,18 @@ export class ProjetosService {
     return this.raiasService.obterRaiasPorProjeto(projetoId).length > 0;
   }
 
-  criarProjeto(dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'>): void {
+  criarProjeto(dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'> & { raiasPadrao: RaiaPadraoProjeto[] }): void {
     this.http
       .post<Projeto>(this.urlProjetos, {
         nome: dadosProjeto.nome,
         descricao: dadosProjeto.descricao,
         cor: dadosProjeto.cor ?? null,
+        raiasPadrao: dadosProjeto.raiasPadrao,
       })
       .subscribe({
         next: (projetoCriado) => {
           this.projetosInterno.update((listaAtual) => [this.normalizarProjeto(projetoCriado), ...listaAtual]);
+          this.raiasService.carregarRaiasProjeto(projetoCriado.id);
           this.garantirProjetoPrincipalLocal();
         },
         error: (erro) => {

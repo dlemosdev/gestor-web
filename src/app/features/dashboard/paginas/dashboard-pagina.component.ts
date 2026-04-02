@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
 import { Projeto } from '../../../models/projeto.model';
 import { AtividadesService } from '../../../services/atividades.service';
@@ -33,9 +33,9 @@ interface ResumoRaiaDashboard {
         <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div class="space-y-2">
             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-terciaria">Painel executivo</p>
-            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Visao consolidada do portfolio</h2>
+            <h2 class="text-2xl font-semibold text-cor-texto sm:text-3xl">Visão consolidada do portfólio</h2>
             <p class="max-w-2xl text-sm leading-6 text-cor-texto-secundaria">
-              Acompanhe progresso, gargalos e produtividade dos projetos em um unico lugar.
+              Acompanhe progresso, gargalos e produtividade dos projetos em um único lugar.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ interface ResumoRaiaDashboard {
         </article>
 
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Concluidas</p>
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Concluídas</p>
           <p class="mt-3 text-3xl font-semibold text-emerald-400">{{ totalConcluidas() }}</p>
           <p class="mt-2 text-xs text-cor-texto-secundaria">{{ percentualConcluidoGeral() }}% de entrega geral</p>
         </article>
@@ -68,11 +68,11 @@ interface ResumoRaiaDashboard {
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Em teste</p>
           <p class="mt-3 text-3xl font-semibold text-amber-300">{{ totalEmTeste() }}</p>
-          <p class="mt-2 text-xs text-cor-texto-secundaria">Itens na etapa de validacao final</p>
+          <p class="mt-2 text-xs text-cor-texto-secundaria">Itens na etapa de validação final</p>
         </article>
 
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Aguardando publicacao</p>
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Aguardando publicação</p>
           <p class="mt-3 text-3xl font-semibold text-sky-300">{{ totalAguardandoPublicacao() }}</p>
           <p class="mt-2 text-xs text-cor-texto-secundaria">Entregas prontas aguardando liberar</p>
         </article>
@@ -83,7 +83,7 @@ interface ResumoRaiaDashboard {
           <header class="mb-4 flex items-center justify-between gap-3">
             <div>
               <h3 class="text-base font-semibold text-cor-texto">Progresso por projeto</h3>
-              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanco real das iniciativas em andamento.</p>
+              <p class="text-xs text-cor-texto-secundaria">Acompanhe o avanço real das iniciativas em andamento.</p>
             </div>
           </header>
 
@@ -120,8 +120,8 @@ interface ResumoRaiaDashboard {
 
         <div class="grid grid-cols-1 gap-5">
           <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-            <h3 class="text-base font-semibold text-cor-texto">Distribuicao por raias</h3>
-            <p class="mt-1 text-xs text-cor-texto-secundaria">Panorama das 5 etapas padrao do fluxo atual.</p>
+            <h3 class="text-base font-semibold text-cor-texto">Distribuição por raias</h3>
+            <p class="mt-1 text-xs text-cor-texto-secundaria">Panorama das 5 etapas padrão do fluxo atual.</p>
 
             <div class="mt-4 space-y-3">
               @for (resumo of resumoPorRaia(); track resumo.nome) {
@@ -138,7 +138,7 @@ interface ResumoRaiaDashboard {
   `,
 })
 export class DashboardPaginaComponent {
-  private readonly nomesRaiasPadrao = ['Backlog', 'Em andamento', 'Teste', 'Aguardando publicacao', 'Concluidas'] as const;
+  private readonly nomesRaiasPadrao = ['Backlog', 'Em andamento', 'Teste', 'Aguardando publicação', 'Concluídas'] as const;
 
   private readonly projetosService = inject(ProjetosService);
   private readonly raiasService = inject(RaiasService);
@@ -153,21 +153,9 @@ export class DashboardPaginaComponent {
   readonly totalRaias = computed(() => this.raiasService.raias().length);
   readonly totalAtividades = computed(() => this.atividadesService.atividades().length);
 
-  readonly totalBacklog = computed(
-    () => this.totalAtividadesPorNomeRaia('Backlog'),
-  );
-  readonly totalEmAndamento = computed(
-    () => this.totalAtividadesPorNomeRaia('Em andamento'),
-  );
-  readonly totalEmTeste = computed(
-    () => this.totalAtividadesPorNomeRaia('Teste'),
-  );
-  readonly totalAguardandoPublicacao = computed(
-    () => this.totalAtividadesPorNomeRaia('Aguardando publicacao'),
-  );
-  readonly totalConcluidas = computed(
-    () => this.totalAtividadesPorNomeRaia('Concluidas'),
-  );
+  readonly totalEmTeste = computed(() => this.totalAtividadesPorNomeRaia('Teste'));
+  readonly totalAguardandoPublicacao = computed(() => this.totalAtividadesPorNomeRaia('Aguardando publicação'));
+  readonly totalConcluidas = computed(() => this.totalAtividadesPorNomeRaia('Concluídas'));
   readonly resumoPorRaia = computed<ResumoRaiaDashboard[]>(() =>
     this.nomesRaiasPadrao.map((nome) => ({
       nome,
@@ -237,9 +225,9 @@ export class DashboardPaginaComponent {
         return 'bg-blue-500/15 text-blue-300';
       case 'Teste':
         return 'bg-amber-500/15 text-amber-300';
-      case 'Aguardando publicacao':
+      case 'Aguardando publicação':
         return 'bg-sky-500/15 text-sky-300';
-      case 'Concluidas':
+      case 'Concluídas':
         return 'bg-emerald-500/15 text-emerald-300';
       default:
         return 'border border-borda bg-superficie text-cor-texto';

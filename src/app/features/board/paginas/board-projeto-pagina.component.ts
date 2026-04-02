@@ -11,10 +11,8 @@ import { OpcaoSeletorUi } from '../../../shared/ui/seletor/seletor-ui.component'
 import { AtividadesService } from '../../../services/atividades.service';
 import { RaiasService } from '../../../services/raias.service';
 import { UsuariosService } from '../../../services/usuarios.service';
-import { DrawerLateralUiComponent } from '../../../shared/ui/drawer-lateral/drawer-lateral-ui.component';
 import { DrawerDetalheAtividadeComponent } from '../../atividades/componentes/drawer-detalhe-atividade/drawer-detalhe-atividade.component';
 import { FiltrosBoard } from '../componentes/barra-filtros-board/barra-filtros-board.component';
-import { FormularioRaiaComponent } from '../componentes/formulario-raia/formulario-raia.component';
 import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-raias/quadro-raias.component';
 
 @Component({
@@ -22,12 +20,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
   host: {
     class: 'block h-full min-h-0',
   },
-  imports: [
-    QuadroRaiasComponent,
-    DrawerDetalheAtividadeComponent,
-    DrawerLateralUiComponent,
-    FormularioRaiaComponent,
-  ],
+  imports: [QuadroRaiasComponent, DrawerDetalheAtividadeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="-mx-5 -mt-6 flex h-[calc(100%+3rem)] min-h-0 gap-0 overflow-hidden md:-mx-8 md:-mt-8 md:h-[calc(100%+4rem)] lg:-mx-10 lg:-mt-9 lg:h-[calc(100%+4.5rem)]">
@@ -45,7 +38,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
               [class.text-cor-texto-secundaria]="filtroResponsavelAtivo() !== ''"
               (click)="aplicarFiltroRapidoResponsavel('')"
             >
-              Todos responsaveis
+              Todos responsáveis
             </button>
 
             @for (responsavel of responsaveisFiltroRapido(); track responsavel.nome) {
@@ -79,20 +72,12 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
           class="block h-full w-full min-h-0 flex-1 overflow-hidden"
           [raiasComAtividades]="raiasComAtividadesFiltradas()"
           [arrastarDesabilitado]="filtrosAtivos()"
-          (solicitarCriacaoRaia)="abrirDrawerNovaRaia()"
-          (editarNomeRaia)="editarNomeRaia($event.raiaId, $event.nome)"
-          (excluirRaia)="excluirRaia($event.id)"
-          (excluirAtividade)="excluirAtividade($event)"
           (abrirDetalhesAtividade)="abrirDetalhesAtividade($event.id)"
           (soltarAtividade)="moverAtividade($event.evento, $event.raiaDestinoId)"
           (moverRaia)="reordenarRaias($event)"
         />
       </section>
     </section>
-
-    <app-drawer-lateral-ui [aberto]="drawerNovaRaiaAberto()" titulo="Nova Raia" (fechar)="fecharDrawerNovaRaia()">
-      <app-formulario-raia (criar)="criarRaiaPorDrawer($event)" (cancelar)="fecharDrawerNovaRaia()" />
-    </app-drawer-lateral-ui>
 
     <app-drawer-detalhe-atividade
       [aberto]="atividadeNoDrawer() !== null"
@@ -128,10 +113,8 @@ export class BoardProjetoPaginaComponent {
 
   readonly atividadeSelecionadaId = signal<string | null>(null);
   readonly atividadeRascunho = signal<Atividade | null>(null);
-  readonly drawerNovaRaiaAberto = signal(false);
 
   private ultimoPedidoNovaAtividadeProcessado = 0;
-  private ultimoPedidoNovaRaiaProcessado = 0;
 
   readonly opcoesResponsaveis = computed<OpcaoSeletorUi[]>(() =>
     this.usuariosService
@@ -191,7 +174,7 @@ export class BoardProjetoPaginaComponent {
           if (filtroAtual.busca.trim()) {
             const textoBusca = filtroAtual.busca.trim().toLowerCase();
             const textoEtiquetas = atividade.etiquetas.map((etiqueta) => etiqueta.nome).join(' ');
-            const campoIndexado = `${atividade.titulo} ${atividade.descricao} ${textoEtiquetas}`.toLowerCase();
+            const campoIndexado = `${atividade.titulo} ${atividade.descricao} ${textoEtiquetas} ${atividade.codigoReferencia} ${atividade.tipo}`.toLowerCase();
 
             if (!campoIndexado.includes(textoBusca)) {
               return false;
@@ -221,7 +204,7 @@ export class BoardProjetoPaginaComponent {
   });
 
   constructor() {
-    this.raiasService.garantirRaiasPadraoProjeto(this.idProjetoRota);
+    this.raiasService.carregarRaiasProjeto(this.idProjetoRota);
 
     effect(() => {
       const pedidoAtual = this.acoesInterfaceService.solicitacaoNovaAtividade();
@@ -229,15 +212,6 @@ export class BoardProjetoPaginaComponent {
       if (pedidoAtual > this.ultimoPedidoNovaAtividadeProcessado) {
         this.ultimoPedidoNovaAtividadeProcessado = pedidoAtual;
         this.iniciarCriacaoAtividade();
-      }
-    });
-
-    effect(() => {
-      const pedidoAtual = this.acoesInterfaceService.solicitacaoNovaRaia();
-
-      if (pedidoAtual > this.ultimoPedidoNovaRaiaProcessado) {
-        this.ultimoPedidoNovaRaiaProcessado = pedidoAtual;
-        this.abrirDrawerNovaRaia();
       }
     });
   }
@@ -251,32 +225,6 @@ export class BoardProjetoPaginaComponent {
       ...filtrosAtuais,
       responsavel,
     }));
-  }
-
-  criarRaia(nome: string): void {
-    this.raiasService.criarRaia(this.idProjetoRota, nome);
-  }
-
-  abrirDrawerNovaRaia(): void {
-    this.drawerNovaRaiaAberto.set(true);
-  }
-
-  fecharDrawerNovaRaia(): void {
-    this.drawerNovaRaiaAberto.set(false);
-  }
-
-  criarRaiaPorDrawer(nome: string): void {
-    this.criarRaia(nome);
-    this.fecharDrawerNovaRaia();
-  }
-
-  editarNomeRaia(raiaId: string, nome: string): void {
-    this.raiasService.editarNomeRaia(raiaId, nome);
-  }
-
-  excluirRaia(raiaId: string): void {
-    this.raiasService.excluirRaia(raiaId);
-    this.atividadesService.excluirAtividadesDaRaia(raiaId);
   }
 
   abrirDetalhesAtividade(atividadeId: string): void {
@@ -389,7 +337,7 @@ export class BoardProjetoPaginaComponent {
       return;
     }
 
-    const responsavelPadrao = this.opcoesResponsaveis()[0]?.valor ?? 'Sem responsavel';
+    const responsavelPadrao = this.opcoesResponsaveis()[0]?.valor ?? 'Sem responsável';
 
     this.atividadeSelecionadaId.set(null);
     this.atividadeRascunho.set({

@@ -6,7 +6,7 @@ import { ProjetosService } from '../../../services/projetos.service';
 import { BotaoUiComponent } from '../../../shared/ui/botao/botao-ui.component';
 import { DialogoConfirmacaoUiComponent } from '../../../shared/ui/dialogo-confirmacao/dialogo-confirmacao-ui.component';
 import { DrawerLateralUiComponent } from '../../../shared/ui/drawer-lateral/drawer-lateral-ui.component';
-import { FormularioProjetoComponent } from '../componentes/formulario-projeto/formulario-projeto.component';
+import { DadosFormularioProjeto, FormularioProjetoComponent } from '../componentes/formulario-projeto/formulario-projeto.component';
 import { ListaProjetosComponent } from '../componentes/lista-projetos/lista-projetos.component';
 
 @Component({
@@ -119,9 +119,7 @@ export class ProjetosPaginaComponent {
     this.drawerProjetoAberto.set(true);
   }
 
-  salvarProjeto(
-    projeto: Omit<Projeto, 'id' | 'criadoEm' | 'atualizadoEm' | 'status' | 'principal'> & { id?: string },
-  ): void {
+  salvarProjeto(projeto: DadosFormularioProjeto): void {
     if (projeto.id) {
       this.projetosService.atualizarProjeto(projeto.id, {
         nome: projeto.nome,
@@ -136,6 +134,7 @@ export class ProjetosPaginaComponent {
       nome: projeto.nome,
       descricao: projeto.descricao,
       cor: projeto.cor,
+      raiasPadrao: projeto.raiasPadrao,
     });
 
     this.fecharDrawerProjeto();

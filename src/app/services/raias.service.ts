@@ -1,6 +1,5 @@
-﻿import { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
 
 import { apiUrlBase } from '../core/config/api.config';
 import { Raia } from '../models/raia.model';
@@ -10,7 +9,6 @@ import { Raia } from '../models/raia.model';
 })
 export class RaiasService {
   private readonly urlRaias = `${apiUrlBase}/raias`;
-  private readonly nomesPadrao = ['Backlog', 'Em andamento', 'Teste', 'Aguardando publicacao', 'Concluidas'];
 
   private readonly raiasInterno = signal<Raia[]>([]);
   readonly raias = this.raiasInterno.asReadonly();
@@ -25,106 +23,16 @@ export class RaiasService {
       .sort((a, b) => a.ordem - b.ordem);
   }
 
-  garantirRaiasPadraoProjeto(projetoId: string): void {
+  carregarRaiasProjeto(projetoId: string): void {
     this.http.get<Raia[]>(`${apiUrlBase}/projetos/${projetoId}/raias`).subscribe({
       next: (raiasProjeto) => {
-        const raiasNormalizadas = raiasProjeto.map((raia) => this.normalizarRaia(raia));
-
-        if (raiasNormalizadas.length > 0) {
-          this.atualizarRaiasProjetoNoEstado(projetoId, raiasNormalizadas);
-          return;
-        }
-
-        const criacoes = this.nomesPadrao.map((nome) =>
-          this.http.post<Raia>(`${apiUrlBase}/projetos/${projetoId}/raias`, {
-            nome,
-            cor: null,
-          }),
+        this.atualizarRaiasProjetoNoEstado(
+          projetoId,
+          raiasProjeto.map((raia) => this.normalizarRaia(raia)),
         );
-
-        forkJoin(criacoes).subscribe({
-          next: () => {
-            this.recarregarRaiasProjeto(projetoId);
-          },
-          error: (erro) => {
-            console.error('Falha ao criar raias padrão na API.', erro);
-          },
-        });
       },
       error: (erro) => {
-        console.error('Falha ao verificar raias do projeto na API.', erro);
-      },
-    });
-  }
-
-  criarRaia(projetoId: string, nome: string): void {
-    this.http
-      .post<Raia>(`${apiUrlBase}/projetos/${projetoId}/raias`, {
-        nome,
-        cor: null,
-      })
-      .subscribe({
-        next: (raiaCriada) => {
-          this.raiasInterno.update((listaAtual) => [...listaAtual, this.normalizarRaia(raiaCriada)]);
-        },
-        error: (erro) => {
-          console.error('Falha ao criar raia na API.', erro);
-        },
-      });
-  }
-
-  editarNomeRaia(raiaId: string, nome: string): void {
-    const raiaAtual = this.raiasInterno().find((raia) => raia.id === raiaId);
-    if (!raiaAtual) {
-      return;
-    }
-
-    this.http
-      .put<Raia>(`${apiUrlBase}/raias/${raiaId}`, {
-        nome,
-        cor: raiaAtual.cor ?? null,
-      })
-      .subscribe({
-        next: (raiaAtualizada) => {
-          this.raiasInterno.update((listaAtual) =>
-            listaAtual.map((raia) => (raia.id === raiaId ? this.normalizarRaia(raiaAtualizada) : raia)),
-          );
-        },
-        error: (erro) => {
-          console.error('Falha ao editar nome da raia na API.', erro);
-        },
-      });
-  }
-
-  excluirRaia(raiaId: string): void {
-    const snapshotAnterior = this.raiasInterno();
-    const raiaRemovida = snapshotAnterior.find((raia) => raia.id === raiaId);
-
-    if (!raiaRemovida) {
-      return;
-    }
-
-    this.raiasInterno.update((listaAtual) => {
-      const semRaia = listaAtual.filter((raia) => raia.id !== raiaId);
-      return semRaia
-        .map((raia) => {
-          if (raia.projetoId !== raiaRemovida.projetoId) {
-            return raia;
-          }
-
-          const novaOrdem = raia.ordem > raiaRemovida.ordem ? raia.ordem - 1 : raia.ordem;
-          return novaOrdem === raia.ordem ? raia : { ...raia, ordem: novaOrdem };
-        })
-        .sort((a, b) => a.ordem - b.ordem);
-    });
-
-    this.http.delete<void>(`${apiUrlBase}/raias/${raiaId}`).subscribe({
-      next: () => {
-        this.recarregarRaiasProjeto(raiaRemovida.projetoId);
-      },
-      error: (erro) => {
-        this.raiasInterno.set(snapshotAnterior);
-        console.error('Falha ao excluir raia na API.', erro);
+        console.error('Falha ao carregar raias do projeto na API.', erro);
       },
     });
   }
@@ -167,17 +75,7 @@ export class RaiasService {
   }
 
   private recarregarRaiasProjeto(projetoId: string): void {
-    this.http.get<Raia[]>(`${apiUrlBase}/projetos/${projetoId}/raias`).subscribe({
-      next: (raiasProjeto) => {
-        this.atualizarRaiasProjetoNoEstado(
-          projetoId,
-          raiasProjeto.map((raia) => this.normalizarRaia(raia)),
-        );
-      },
-      error: (erro) => {
-        console.error('Falha ao recarregar raias do projeto na API.', erro);
-      },
-    });
+    this.carregarRaiasProjeto(projetoId);
   }
 
   private atualizarRaiasProjetoNoEstado(projetoId: string, raiasProjeto: Raia[]): void {
@@ -194,4 +92,3 @@ export class RaiasService {
     };
   }
 }
-

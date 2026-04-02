@@ -54,13 +54,6 @@ import { ProjetosService } from '../../services/projetos.service';
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="inline-flex h-9 items-center rounded-xl border border-borda bg-superficie-secundaria px-3 text-sm font-semibold text-cor-texto-secundaria transition hover:border-borda-forte hover:bg-superficie hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
-                (click)="solicitarNovaRaia()"
-              >
-                Nova Raia
-              </button>
-              <button
-                type="button"
                 class="inline-flex h-9 items-center rounded-xl border border-transparent bg-primaria px-3 text-sm font-semibold text-white transition hover:bg-primaria-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
                 (click)="solicitarNovaAtividade()"
               >
@@ -115,7 +108,7 @@ export class TopbarComponent {
       return 'Projetos';
     }
 
-    return 'Visao Geral';
+    return 'Visão Geral';
   });
 
   alternarSidebar(): void {
@@ -124,10 +117,6 @@ export class TopbarComponent {
 
   solicitarNovaAtividade(): void {
     this.acoesInterfaceService.solicitarNovaAtividade();
-  }
-
-  solicitarNovaRaia(): void {
-    this.acoesInterfaceService.solicitarNovaRaia();
   }
 
   private nomeProjetoAtual(): string | null {

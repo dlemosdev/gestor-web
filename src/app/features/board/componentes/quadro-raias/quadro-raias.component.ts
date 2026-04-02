@@ -1,4 +1,4 @@
-﻿import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { Atividade } from '../../../../models/atividade.model';
@@ -22,10 +22,8 @@ export interface RaiaComAtividades {
   template: `
     @if (raiasComAtividades().length === 0) {
       <app-estado-vazio-ui
-        titulo="Nenhuma raia criada"
-        descricao="Crie a primeira raia para começar o fluxo do projeto."
-        textoAcao="Criar primeira raia"
-        (acaoPrimaria)="solicitarCriacaoRaia.emit()"
+        titulo="Nenhuma raia configurada"
+        descricao="Esse projeto não possui raias visíveis no board."
       />
     } @else {
       <section class="flex h-full min-h-0 flex-col pt-2" aria-label="Quadro de raias">
@@ -49,9 +47,6 @@ export interface RaiaComAtividades {
                 [atividades]="item.atividades"
                 [idsConectados]="idsDropList()"
                 [arrastarDesabilitado]="arrastarDesabilitado()"
-                (editarNomeRaia)="editarNomeRaia.emit($event)"
-                (excluirRaia)="excluirRaia.emit($event)"
-                (excluirAtividade)="excluirAtividade.emit($event)"
                 (abrirDetalhesAtividade)="abrirDetalhesAtividade.emit($event)"
                 (soltar)="soltarAtividade.emit($event)"
               />
@@ -84,10 +79,6 @@ export class QuadroRaiasComponent {
   readonly raiasComAtividades = input<RaiaComAtividades[]>([]);
   readonly arrastarDesabilitado = input(false);
 
-  readonly solicitarCriacaoRaia = output<void>();
-  readonly editarNomeRaia = output<{ raiaId: string; nome: string }>();
-  readonly excluirRaia = output<Raia>();
-  readonly excluirAtividade = output<string>();
   readonly abrirDetalhesAtividade = output<Atividade>();
   readonly soltarAtividade = output<EventoSoltarAtividade>();
   readonly moverRaia = output<RaiaComAtividades[]>();
