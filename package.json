@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "api:install": "npm --prefix backend install",
+    "api:start": "npm --prefix backend run start",
+    "api:dev": "npm --prefix backend run dev"
   },
   "private": true,
   "dependencies": {

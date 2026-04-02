@@ -1,34 +1,35 @@
-﻿import { Injectable, signal } from '@angular/core';
+﻿import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
 
-import { ArmazenamentoLocalService } from '../core/services/armazenamento-local.service';
+import { apiUrlBase } from '../core/config/api.config';
 import { Usuario } from '../models/usuario.model';
-import { DadosMockService } from './dados-mock.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UsuariosService {
-  private readonly chaveUsuarios = 'gestor:usuarios';
+  private readonly urlUsuarios = `${apiUrlBase}/usuarios`;
 
   private readonly usuariosInterno = signal<Usuario[]>([]);
   readonly usuarios = this.usuariosInterno.asReadonly();
 
-  constructor(
-    private readonly armazenamentoLocalService: ArmazenamentoLocalService,
-    private readonly dadosMockService: DadosMockService,
-  ) {
-    this.dadosMockService.garantirDadosIniciais();
-    this.carregar();
+  constructor(private readonly http: HttpClient) {
+    this.carregarUsuarios();
   }
 
   listarUsuarios(): Usuario[] {
     return this.usuariosInterno();
   }
 
-  private carregar(): void {
-    const usuariosSalvos = this.armazenamentoLocalService.obterItem<Usuario[]>(this.chaveUsuarios);
-    this.usuariosInterno.set(usuariosSalvos ?? []);
+  private carregarUsuarios(): void {
+    this.http.get<Usuario[]>(this.urlUsuarios).subscribe({
+      next: (usuariosApi) => {
+        this.usuariosInterno.set(usuariosApi);
+      },
+      error: (erro) => {
+        console.error('Falha ao carregar usuários da API.', erro);
+      },
+    });
   }
 }
-
 

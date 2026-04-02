@@ -11,7 +11,7 @@ Referências de experiência: Jira, Linear, Trello e ClickUp, com adaptação pa
 ## Principais funcionalidades
 
 - Gestão de projetos:
-  - criar, editar e arquivar/ativar projeto
+  - criar, editar, definir projeto principal e excluir projeto
   - acesso rápido ao board de cada projeto
 - Board por projeto:
   - raias dinâmicas (criar, renomear, excluir, reordenar)
@@ -20,6 +20,7 @@ Referências de experiência: Jira, Linear, Trello e ClickUp, com adaptação pa
 - Atividades:
   - criação e edição em drawer lateral
   - campos completos (título, descrição, prioridade, status, responsável, prazo)
+  - etiquetas com cor personalizada
   - checklist e comentários mockados
   - exclusão com modal de confirmação
 - Filtros:
@@ -31,6 +32,23 @@ Referências de experiência: Jira, Linear, Trello e ClickUp, com adaptação pa
 - Persistência local:
   - armazenamento via `localStorage`
   - seed inicial automático com dados mockados
+
+## API backend (Node + Express + SQLite)
+
+Agora o projeto também possui uma API REST em `backend/` para suportar a evolução do frontend para modo cliente-servidor.
+
+- Stack:
+  - Node.js
+  - Express
+  - SQLite
+- Banco:
+  - arquivo local em `backend/dados.db`
+  - criação automática de schema + seed inicial
+- Cobertura REST:
+  - usuários
+  - projetos (CRUD + principal)
+  - raias (CRUD + reordenação)
+  - atividades (CRUD + checklist + comentários + reordenação)
 
 ## Stack e tecnologias
 
@@ -116,12 +134,35 @@ npm start
 http://localhost:4200
 ```
 
+### Executar API local
+
+1. Instalar dependências da API:
+
+```bash
+npm run api:install
+```
+
+2. Subir API:
+
+```bash
+npm run api:start
+```
+
+3. Endpoint base:
+
+```text
+http://localhost:3333/api
+```
+
 ## Scripts disponíveis
 
 - `npm start`: sobe o servidor de desenvolvimento
 - `npm run build`: gera build de produção
 - `npm run watch`: build em modo watch
 - `npm test`: executa testes
+- `npm run api:install`: instala dependências do backend
+- `npm run api:start`: inicia API backend
+- `npm run api:dev`: inicia API backend em modo watch
 
 ## Build de produção
 

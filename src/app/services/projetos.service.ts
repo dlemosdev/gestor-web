@@ -1,29 +1,27 @@
-﻿import { Injectable, signal } from '@angular/core';
+﻿import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
 
-import { ArmazenamentoLocalService } from '../core/services/armazenamento-local.service';
+import { apiUrlBase } from '../core/config/api.config';
 import { StatusProjeto } from '../models/enums/status-projeto.enum';
 import { Projeto } from '../models/projeto.model';
 import { AtividadesService } from './atividades.service';
-import { DadosMockService } from './dados-mock.service';
 import { RaiasService } from './raias.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjetosService {
-  private readonly chaveProjetos = 'gestor:projetos';
+  private readonly urlProjetos = `${apiUrlBase}/projetos`;
 
   private readonly projetosInterno = signal<Projeto[]>([]);
   readonly projetos = this.projetosInterno.asReadonly();
 
   constructor(
-    private readonly armazenamentoLocalService: ArmazenamentoLocalService,
-    private readonly dadosMockService: DadosMockService,
+    private readonly http: HttpClient,
     private readonly raiasService: RaiasService,
     private readonly atividadesService: AtividadesService,
   ) {
-    this.dadosMockService.garantirDadosIniciais();
-    this.carregar();
+    this.carregarProjetos();
   }
 
   obterProjetoPorId(projetoId: string): Projeto | null {
@@ -39,114 +37,122 @@ export class ProjetosService {
   }
 
   criarProjeto(dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'>): void {
-    const agora = new Date().toISOString();
-
-    const novoProjeto: Projeto = {
-      id: crypto.randomUUID(),
-      nome: dadosProjeto.nome,
-      descricao: dadosProjeto.descricao,
-      cor: dadosProjeto.cor,
-      principal: false,
-      criadoEm: agora,
-      atualizadoEm: agora,
-      status: StatusProjeto.ATIVO,
-    };
-
-    this.projetosInterno.update((listaAtual) => [novoProjeto, ...listaAtual]);
-    this.persistir();
+    this.http
+      .post<Projeto>(this.urlProjetos, {
+        nome: dadosProjeto.nome,
+        descricao: dadosProjeto.descricao,
+        cor: dadosProjeto.cor ?? null,
+      })
+      .subscribe({
+        next: (projetoCriado) => {
+          this.projetosInterno.update((listaAtual) => [this.normalizarProjeto(projetoCriado), ...listaAtual]);
+          this.garantirProjetoPrincipalLocal();
+        },
+        error: (erro) => {
+          console.error('Falha ao criar projeto na API.', erro);
+        },
+      });
   }
 
   atualizarProjeto(projetoId: string, dadosProjeto: Pick<Projeto, 'nome' | 'descricao' | 'cor'>): void {
-    this.projetosInterno.update((listaAtual) =>
-      listaAtual.map((projeto) =>
-        projeto.id === projetoId
-          ? {
-              ...projeto,
-              ...dadosProjeto,
-              atualizadoEm: new Date().toISOString(),
-            }
-          : projeto,
-      ),
-    );
-
-    this.persistir();
+    this.http
+      .put<Projeto>(`${this.urlProjetos}/${projetoId}`, {
+        nome: dadosProjeto.nome,
+        descricao: dadosProjeto.descricao,
+        cor: dadosProjeto.cor ?? null,
+      })
+      .subscribe({
+        next: (projetoAtualizado) => {
+          this.projetosInterno.update((listaAtual) =>
+            listaAtual.map((projeto) => (projeto.id === projetoId ? this.normalizarProjeto(projetoAtualizado) : projeto)),
+          );
+        },
+        error: (erro) => {
+          console.error('Falha ao atualizar projeto na API.', erro);
+        },
+      });
   }
 
   definirProjetoPrincipal(projetoId: string): void {
-    const agora = new Date().toISOString();
-
-    this.projetosInterno.update((listaAtual) =>
-      listaAtual.map((projeto) => ({
-        ...projeto,
-        principal: projeto.id === projetoId,
-        atualizadoEm: projeto.id === projetoId ? agora : projeto.atualizadoEm,
-      })),
-    );
-
-    this.persistir();
+    this.http.patch<Projeto>(`${this.urlProjetos}/${projetoId}/principal`, {}).subscribe({
+      next: (projetoPrincipalAtualizado) => {
+        this.projetosInterno.update((listaAtual) =>
+          listaAtual.map((projeto) => ({
+            ...projeto,
+            principal: projeto.id === projetoPrincipalAtualizado.id,
+            atualizadoEm: projeto.id === projetoPrincipalAtualizado.id ? projetoPrincipalAtualizado.atualizadoEm : projeto.atualizadoEm,
+          })),
+        );
+      },
+      error: (erro) => {
+        console.error('Falha ao definir projeto principal na API.', erro);
+      },
+    });
   }
 
   excluirProjeto(projetoId: string): void {
+    const snapshotAnterior = this.projetosInterno();
+
     this.projetosInterno.update((listaAtual) => listaAtual.filter((projeto) => projeto.id !== projetoId));
     this.raiasService.excluirRaiasDoProjeto(projetoId);
     this.atividadesService.excluirAtividadesDoProjeto(projetoId);
-    this.garantirProjetoPrincipal();
-    this.persistir();
+    this.garantirProjetoPrincipalLocal();
+
+    this.http.delete<void>(`${this.urlProjetos}/${projetoId}`).subscribe({
+      next: () => {
+        this.carregarProjetos();
+      },
+      error: (erro) => {
+        this.projetosInterno.set(snapshotAnterior);
+        this.carregarProjetos();
+        console.error('Falha ao excluir projeto na API.', erro);
+      },
+    });
   }
 
-  private carregar(): void {
-    const projetosSalvos = this.armazenamentoLocalService.obterItem<Projeto[]>(this.chaveProjetos);
-    const projetosNormalizados = (projetosSalvos ?? []).map((projeto) => ({
-      ...projeto,
-      status: StatusProjeto.ATIVO,
-      principal: projeto.principal ?? false,
-    }));
-
-    this.projetosInterno.set(projetosNormalizados);
-    this.garantirProjetoPrincipal();
+  private carregarProjetos(): void {
+    this.http.get<Projeto[]>(this.urlProjetos).subscribe({
+      next: (projetosApi) => {
+        this.projetosInterno.set(projetosApi.map((projeto) => this.normalizarProjeto(projeto)));
+        this.garantirProjetoPrincipalLocal();
+      },
+      error: (erro) => {
+        console.error('Falha ao carregar projetos da API.', erro);
+      },
+    });
   }
 
-  private garantirProjetoPrincipal(): void {
+  private garantirProjetoPrincipalLocal(): void {
     const projetosAtuais = this.projetosInterno();
     if (projetosAtuais.length === 0) {
       return;
     }
 
     const projetosPrincipais = projetosAtuais.filter((projeto) => projeto.principal);
-
     if (projetosPrincipais.length === 1) {
       return;
     }
 
-    if (projetosPrincipais.length > 1) {
-      const primeiroPrincipal = projetosPrincipais[0];
-      this.projetosInterno.update((listaAtual) =>
-        listaAtual.map((projeto) => ({
-          ...projeto,
-          principal: projeto.id === primeiroPrincipal.id,
-        })),
-      );
-      this.persistir();
-      return;
-    }
-
-    const primeiroProjeto = projetosAtuais[0];
-    if (!primeiroProjeto) {
+    const idPrincipal = projetosPrincipais[0]?.id ?? projetosAtuais[0]?.id;
+    if (!idPrincipal) {
       return;
     }
 
     this.projetosInterno.update((listaAtual) =>
       listaAtual.map((projeto) => ({
         ...projeto,
-        principal: projeto.id === primeiroProjeto.id,
+        principal: projeto.id === idPrincipal,
       })),
     );
-    this.persistir();
   }
 
-  private persistir(): void {
-    this.armazenamentoLocalService.salvarItem(this.chaveProjetos, this.projetosInterno());
+  private normalizarProjeto(projeto: Projeto): Projeto {
+    return {
+      ...projeto,
+      cor: projeto.cor ?? undefined,
+      status: projeto.status ?? StatusProjeto.ATIVO,
+      principal: Boolean(projeto.principal),
+    };
   }
 }
-
 

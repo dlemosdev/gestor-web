@@ -1,29 +1,25 @@
 ﻿import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 
-import { ArmazenamentoLocalService } from '../core/services/armazenamento-local.service';
+import { apiUrlBase } from '../core/config/api.config';
 import { Atividade } from '../models/atividade.model';
 import { ChecklistItem } from '../models/checklist-item.model';
 import { Prioridade } from '../models/enums/prioridade.enum';
 import { StatusAtividade } from '../models/enums/status-atividade.enum';
 import { EtiquetaAtividade } from '../models/etiqueta-atividade.model';
-import { DadosMockService } from './dados-mock.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AtividadesService {
-  private readonly chaveAtividades = 'gestor:atividades';
+  private readonly urlAtividades = `${apiUrlBase}/atividades`;
 
   private readonly atividadesInterno = signal<Atividade[]>([]);
   readonly atividades = this.atividadesInterno.asReadonly();
 
-  constructor(
-    private readonly armazenamentoLocalService: ArmazenamentoLocalService,
-    private readonly dadosMockService: DadosMockService,
-  ) {
-    this.dadosMockService.garantirDadosIniciais();
-    this.carregar();
+  constructor(private readonly http: HttpClient) {
+    this.carregarAtividades();
   }
 
   obterAtividadesPorProjeto(projetoId: string): Atividade[] {
@@ -35,42 +31,80 @@ export class AtividadesService {
   }
 
   criarAtividadeRapida(projetoId: string, raiaId: string, titulo: string, responsavelPadrao: string): void {
-    const ordem = this.obterAtividadesPorRaia(raiaId).length + 1;
     const agora = new Date().toISOString();
 
-    const novaAtividade: Atividade = {
-      id: crypto.randomUUID(),
-      projetoId,
-      raiaId,
-      titulo,
-      descricao: 'Descricao inicial. Edite pelos detalhes da atividade.',
-      prioridade: Prioridade.MEDIA,
-      status: StatusAtividade.BACKLOG,
-      responsavel: responsavelPadrao,
-      prazo: agora.slice(0, 10),
-      etiquetas: [],
-      checklist: [],
-      comentarios: [],
-      ordem,
-      criadoEm: agora,
-      atualizadoEm: agora,
-    };
-
-    this.atividadesInterno.update((listaAtual) => [...listaAtual, novaAtividade]);
-    this.persistir();
+    this.http
+      .post<Atividade>(`${apiUrlBase}/projetos/${projetoId}/atividades`, {
+        raiaId,
+        titulo,
+        descricao: 'Descricao inicial. Edite pelos detalhes da atividade.',
+        prioridade: Prioridade.MEDIA,
+        status: StatusAtividade.BACKLOG,
+        responsavel: responsavelPadrao,
+        prazo: agora.slice(0, 10),
+        etiquetas: [],
+        checklist: [],
+        comentarios: [],
+      })
+      .subscribe({
+        next: (atividadeCriada) => {
+          this.atividadesInterno.update((listaAtual) => [...listaAtual, this.normalizarAtividade(atividadeCriada)]);
+        },
+        error: (erro) => {
+          console.error('Falha ao criar atividade rápida na API.', erro);
+        },
+      });
   }
 
   criarAtividadeCompleta(novaAtividade: Atividade): void {
-    this.atividadesInterno.update((listaAtual) => [...listaAtual, novaAtividade]);
-    this.persistir();
+    this.http
+      .post<Atividade>(`${apiUrlBase}/projetos/${novaAtividade.projetoId}/atividades`, {
+        raiaId: novaAtividade.raiaId,
+        titulo: novaAtividade.titulo,
+        descricao: novaAtividade.descricao,
+        prioridade: novaAtividade.prioridade,
+        status: novaAtividade.status,
+        responsavel: novaAtividade.responsavel,
+        prazo: novaAtividade.prazo,
+        etiquetas: novaAtividade.etiquetas,
+        checklist: novaAtividade.checklist,
+        comentarios: novaAtividade.comentarios,
+      })
+      .subscribe({
+        next: (atividadeCriada) => {
+          this.atividadesInterno.update((listaAtual) => [...listaAtual, this.normalizarAtividade(atividadeCriada)]);
+        },
+        error: (erro) => {
+          console.error('Falha ao criar atividade na API.', erro);
+        },
+      });
   }
 
   salvarAtividade(atividadeAtualizada: Atividade): void {
-    this.atividadesInterno.update((listaAtual) =>
-      listaAtual.map((atividade) => (atividade.id === atividadeAtualizada.id ? atividadeAtualizada : atividade)),
-    );
+    this.substituirAtividadeNoEstado(atividadeAtualizada);
 
-    this.persistir();
+    this.http
+      .put<Atividade>(`${this.urlAtividades}/${atividadeAtualizada.id}`, {
+        raiaId: atividadeAtualizada.raiaId,
+        titulo: atividadeAtualizada.titulo,
+        descricao: atividadeAtualizada.descricao,
+        prioridade: atividadeAtualizada.prioridade,
+        status: atividadeAtualizada.status,
+        responsavel: atividadeAtualizada.responsavel,
+        prazo: atividadeAtualizada.prazo,
+        etiquetas: atividadeAtualizada.etiquetas,
+        checklist: atividadeAtualizada.checklist,
+        comentarios: atividadeAtualizada.comentarios,
+      })
+      .subscribe({
+        next: (atividadeApi) => {
+          this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+        },
+        error: (erro) => {
+          this.recarregarAtividadePorId(atividadeAtualizada.id);
+          console.error('Falha ao salvar atividade na API.', erro);
+        },
+      });
   }
 
   salvarAtividadeComReordenacao(atividadeAtualizada: Atividade): void {
@@ -107,22 +141,57 @@ export class AtividadesService {
         ),
     );
 
-    this.persistir();
+    this.http
+      .put<Atividade>(`${this.urlAtividades}/${atividadeMovida.id}`, {
+        raiaId: atividadeMovida.raiaId,
+        titulo: atividadeMovida.titulo,
+        descricao: atividadeMovida.descricao,
+        prioridade: atividadeMovida.prioridade,
+        status: atividadeMovida.status,
+        responsavel: atividadeMovida.responsavel,
+        prazo: atividadeMovida.prazo,
+        etiquetas: atividadeMovida.etiquetas,
+        checklist: atividadeMovida.checklist,
+        comentarios: atividadeMovida.comentarios,
+      })
+      .subscribe({
+        next: () => {
+          this.reordenarAtividadesRaiaNaApi(atividadeAtual.raiaId, atividadesOrigem);
+          this.reordenarAtividadesRaiaNaApi(atividadeMovida.raiaId, [...atividadesDestino, atividadeMovida]);
+        },
+        error: (erro) => {
+          this.carregarAtividades();
+          console.error('Falha ao mover atividade entre raias via API.', erro);
+        },
+      });
   }
 
   excluirAtividade(atividadeId: string): void {
-    this.atividadesInterno.update((listaAtual) => listaAtual.filter((atividade) => atividade.id !== atividadeId));
-    this.persistir();
+    const atividade = this.obterAtividadePorId(atividadeId);
+    if (!atividade) {
+      return;
+    }
+
+    const snapshotAnterior = this.atividadesInterno();
+    this.atividadesInterno.update((listaAtual) => listaAtual.filter((item) => item.id !== atividadeId));
+
+    this.http.delete<void>(`${this.urlAtividades}/${atividadeId}`).subscribe({
+      next: () => {
+        this.recarregarAtividadesRaia(atividade.raiaId);
+      },
+      error: (erro) => {
+        this.atividadesInterno.set(snapshotAnterior);
+        console.error('Falha ao excluir atividade na API.', erro);
+      },
+    });
   }
 
   excluirAtividadesDaRaia(raiaId: string): void {
     this.atividadesInterno.update((listaAtual) => listaAtual.filter((atividade) => atividade.raiaId !== raiaId));
-    this.persistir();
   }
 
   excluirAtividadesDoProjeto(projetoId: string): void {
     this.atividadesInterno.update((listaAtual) => listaAtual.filter((atividade) => atividade.projetoId !== projetoId));
-    this.persistir();
   }
 
   atualizarChecklist(atividadeId: string, checklist: ChecklistItem[]): void {
@@ -132,7 +201,25 @@ export class AtividadesService {
       return;
     }
 
-    this.salvarAtividade({ ...atividade, checklist, atualizadoEm: new Date().toISOString() });
+    this.substituirAtividadeNoEstado({
+      ...atividade,
+      checklist,
+      atualizadoEm: new Date().toISOString(),
+    });
+
+    this.http
+      .patch<Atividade>(`${this.urlAtividades}/${atividadeId}/checklist`, {
+        checklist,
+      })
+      .subscribe({
+        next: (atividadeApi) => {
+          this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+        },
+        error: (erro) => {
+          this.recarregarAtividadePorId(atividadeId);
+          console.error('Falha ao atualizar checklist na API.', erro);
+        },
+      });
   }
 
   adicionarComentario(atividadeId: string, texto: string): void {
@@ -142,20 +229,18 @@ export class AtividadesService {
       return;
     }
 
-    this.salvarAtividade({
-      ...atividade,
-      comentarios: [
-        ...atividade.comentarios,
-        {
-          id: crypto.randomUUID(),
-          atividadeId,
-          usuarioId: 'Usuario atual',
-          texto,
-          criadoEm: new Date().toISOString(),
+    this.http
+      .post<Atividade>(`${this.urlAtividades}/${atividadeId}/comentarios`, {
+        texto,
+      })
+      .subscribe({
+        next: (atividadeApi) => {
+          this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
         },
-      ],
-      atualizadoEm: new Date().toISOString(),
-    });
+        error: (erro) => {
+          console.error('Falha ao adicionar comentário na API.', erro);
+        },
+      });
   }
 
   moverAtividade(evento: CdkDragDrop<Atividade[]>, raiaDestinoId: string, raiaOrigemId: string): void {
@@ -165,8 +250,30 @@ export class AtividadesService {
       return;
     }
 
+    if (raiaOrigemId === raiaDestinoId) {
+      const atividadesRaia = this.obterAtividadesPorRaia(raiaOrigemId);
+      const indiceOrigem = atividadesRaia.findIndex((atividade) => atividade.id === atividadeMovida.id);
+
+      if (indiceOrigem === -1) {
+        return;
+      }
+
+      const [item] = atividadesRaia.splice(indiceOrigem, 1);
+      atividadesRaia.splice(evento.currentIndex, 0, { ...item, atualizadoEm: new Date().toISOString() });
+
+      const idsRaia = new Set(atividadesRaia.map((atividade) => atividade.id));
+      this.atividadesInterno.update((listaAtual) =>
+        listaAtual
+          .filter((atividade) => !idsRaia.has(atividade.id))
+          .concat(atividadesRaia.map((atividade, indice) => ({ ...atividade, ordem: indice + 1 }))),
+      );
+
+      this.reordenarAtividadesRaiaNaApi(raiaOrigemId, atividadesRaia);
+      return;
+    }
+
     const atividadesOrigem = this.obterAtividadesPorRaia(raiaOrigemId);
-    const atividadesDestino = raiaOrigemId === raiaDestinoId ? atividadesOrigem : this.obterAtividadesPorRaia(raiaDestinoId);
+    const atividadesDestino = this.obterAtividadesPorRaia(raiaDestinoId);
 
     const indiceOrigem = atividadesOrigem.findIndex((atividade) => atividade.id === atividadeMovida.id);
 
@@ -175,7 +282,8 @@ export class AtividadesService {
     }
 
     const [item] = atividadesOrigem.splice(indiceOrigem, 1);
-    atividadesDestino.splice(evento.currentIndex, 0, { ...item, raiaId: raiaDestinoId, atualizadoEm: new Date().toISOString() });
+    const atividadeComNovaRaia = { ...item, raiaId: raiaDestinoId, atualizadoEm: new Date().toISOString() };
+    atividadesDestino.splice(evento.currentIndex, 0, atividadeComNovaRaia);
 
     const idsOrigem = new Set(atividadesOrigem.map((atividade) => atividade.id));
     const idsDestino = new Set(atividadesDestino.map((atividade) => atividade.id));
@@ -189,7 +297,104 @@ export class AtividadesService {
         ),
     );
 
-    this.persistir();
+    this.http
+      .put<Atividade>(`${this.urlAtividades}/${atividadeMovida.id}`, {
+        raiaId: raiaDestinoId,
+        titulo: atividadeMovida.titulo,
+        descricao: atividadeMovida.descricao,
+        prioridade: atividadeMovida.prioridade,
+        status: atividadeMovida.status,
+        responsavel: atividadeMovida.responsavel,
+        prazo: atividadeMovida.prazo,
+        etiquetas: atividadeMovida.etiquetas,
+        checklist: atividadeMovida.checklist,
+        comentarios: atividadeMovida.comentarios,
+      })
+      .subscribe({
+        next: () => {
+          this.reordenarAtividadesRaiaNaApi(raiaOrigemId, atividadesOrigem);
+          this.reordenarAtividadesRaiaNaApi(raiaDestinoId, atividadesDestino);
+        },
+        error: (erro) => {
+          this.carregarAtividades();
+          console.error('Falha ao persistir drag and drop de atividade na API.', erro);
+        },
+      });
+  }
+
+  private carregarAtividades(): void {
+    this.http.get<Atividade[]>(this.urlAtividades).subscribe({
+      next: (atividadesApi) => {
+        const atividadesNormalizadas = atividadesApi.map((atividade) => this.normalizarAtividade(atividade));
+        this.atividadesInterno.set(atividadesNormalizadas);
+      },
+      error: (erro) => {
+        console.error('Falha ao carregar atividades da API.', erro);
+      },
+    });
+  }
+
+  private recarregarAtividadePorId(atividadeId: string): void {
+    this.http.get<Atividade>(`${this.urlAtividades}/${atividadeId}`).subscribe({
+      next: (atividadeApi) => {
+        this.substituirAtividadeNoEstado(this.normalizarAtividade(atividadeApi));
+      },
+      error: (erro) => {
+        console.error('Falha ao recarregar atividade na API.', erro);
+      },
+    });
+  }
+
+  private recarregarAtividadesRaia(raiaId: string): void {
+    this.http
+      .put<Atividade[]>(`${apiUrlBase}/raias/${raiaId}/atividades/reordenar`, {
+        atividades: this.obterAtividadesPorRaia(raiaId).map((atividade) => ({ id: atividade.id })),
+      })
+      .subscribe({
+        next: (atividadesRaiaApi) => {
+          const idsRaia = new Set(atividadesRaiaApi.map((atividade) => atividade.id));
+          this.atividadesInterno.update((listaAtual) => {
+            const outrasAtividades = listaAtual.filter((atividade) => !idsRaia.has(atividade.id));
+            return [...outrasAtividades, ...atividadesRaiaApi.map((atividade) => this.normalizarAtividade(atividade))];
+          });
+        },
+        error: (erro) => {
+          console.error('Falha ao sincronizar raia de atividades na API.', erro);
+        },
+      });
+  }
+
+  private reordenarAtividadesRaiaNaApi(raiaId: string, atividadesRaia: Atividade[]): void {
+    this.http
+      .put<Atividade[]>(`${apiUrlBase}/raias/${raiaId}/atividades/reordenar`, {
+        atividades: atividadesRaia.map((atividade) => ({ id: atividade.id })),
+      })
+      .subscribe({
+        next: (atividadesRaiaApi) => {
+          const idsRaia = new Set(atividadesRaiaApi.map((atividade) => atividade.id));
+          this.atividadesInterno.update((listaAtual) => {
+            const outrasAtividades = listaAtual.filter((atividade) => !idsRaia.has(atividade.id));
+            return [...outrasAtividades, ...atividadesRaiaApi.map((atividade) => this.normalizarAtividade(atividade))];
+          });
+        },
+        error: (erro) => {
+          console.error('Falha ao reordenar atividades da raia na API.', erro);
+        },
+      });
+  }
+
+  private substituirAtividadeNoEstado(atividadeAtualizada: Atividade): void {
+    const atividadeNormalizada = this.normalizarAtividade(atividadeAtualizada);
+
+    this.atividadesInterno.update((listaAtual) => {
+      const indice = listaAtual.findIndex((atividade) => atividade.id === atividadeNormalizada.id);
+
+      if (indice === -1) {
+        return [...listaAtual, atividadeNormalizada];
+      }
+
+      return listaAtual.map((atividade) => (atividade.id === atividadeNormalizada.id ? atividadeNormalizada : atividade));
+    });
   }
 
   private obterAtividadesPorRaia(raiaId: string): Atividade[] {
@@ -199,18 +404,13 @@ export class AtividadesService {
       .map((atividade) => ({ ...atividade }));
   }
 
-  private carregar(): void {
-    const atividadesSalvas = this.armazenamentoLocalService.obterItem<Atividade[]>(this.chaveAtividades);
-    const atividadesNormalizadas = (atividadesSalvas ?? []).map((atividade) => ({
+  private normalizarAtividade(atividade: Atividade): Atividade {
+    return {
       ...atividade,
       etiquetas: this.normalizarEtiquetas(atividade.etiquetas as unknown[]),
-    }));
-    this.atividadesInterno.set(atividadesNormalizadas);
-    this.persistir();
-  }
-
-  private persistir(): void {
-    this.armazenamentoLocalService.salvarItem(this.chaveAtividades, this.atividadesInterno());
+      checklist: Array.isArray(atividade.checklist) ? atividade.checklist : [],
+      comentarios: Array.isArray(atividade.comentarios) ? atividade.comentarios : [],
+    };
   }
 
   private normalizarEtiquetas(etiquetas: unknown[]): EtiquetaAtividade[] {
@@ -237,4 +437,3 @@ export class AtividadesService {
       .filter((etiqueta): etiqueta is EtiquetaAtividade => etiqueta !== null);
   }
 }
-
