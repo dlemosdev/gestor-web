@@ -7,6 +7,7 @@ import { Atividade } from '../models/atividade.model';
 import { ChecklistItem } from '../models/checklist-item.model';
 import { Prioridade } from '../models/enums/prioridade.enum';
 import { StatusAtividade } from '../models/enums/status-atividade.enum';
+import { TipoAtividade } from '../models/enums/tipo-atividade.enum';
 import { EtiquetaAtividade } from '../models/etiqueta-atividade.model';
 
 @Injectable({
@@ -36,6 +37,8 @@ export class AtividadesService {
     this.http
       .post<Atividade>(`${apiUrlBase}/projetos/${projetoId}/atividades`, {
         raiaId,
+        tipo: TipoAtividade.HU,
+        atividadePaiId: null,
         titulo,
         descricao: 'Descricao inicial. Edite pelos detalhes da atividade.',
         prioridade: Prioridade.MEDIA,
@@ -60,6 +63,8 @@ export class AtividadesService {
     this.http
       .post<Atividade>(`${apiUrlBase}/projetos/${novaAtividade.projetoId}/atividades`, {
         raiaId: novaAtividade.raiaId,
+        tipo: novaAtividade.tipo,
+        atividadePaiId: novaAtividade.atividadePaiId,
         titulo: novaAtividade.titulo,
         descricao: novaAtividade.descricao,
         prioridade: novaAtividade.prioridade,
@@ -86,6 +91,8 @@ export class AtividadesService {
     this.http
       .put<Atividade>(`${this.urlAtividades}/${atividadeAtualizada.id}`, {
         raiaId: atividadeAtualizada.raiaId,
+        tipo: atividadeAtualizada.tipo,
+        atividadePaiId: atividadeAtualizada.atividadePaiId,
         titulo: atividadeAtualizada.titulo,
         descricao: atividadeAtualizada.descricao,
         prioridade: atividadeAtualizada.prioridade,
@@ -144,6 +151,8 @@ export class AtividadesService {
     this.http
       .put<Atividade>(`${this.urlAtividades}/${atividadeMovida.id}`, {
         raiaId: atividadeMovida.raiaId,
+        tipo: atividadeMovida.tipo,
+        atividadePaiId: atividadeMovida.atividadePaiId,
         titulo: atividadeMovida.titulo,
         descricao: atividadeMovida.descricao,
         prioridade: atividadeMovida.prioridade,
@@ -300,6 +309,8 @@ export class AtividadesService {
     this.http
       .put<Atividade>(`${this.urlAtividades}/${atividadeMovida.id}`, {
         raiaId: raiaDestinoId,
+        tipo: atividadeMovida.tipo,
+        atividadePaiId: atividadeMovida.atividadePaiId,
         titulo: atividadeMovida.titulo,
         descricao: atividadeMovida.descricao,
         prioridade: atividadeMovida.prioridade,
@@ -407,6 +418,10 @@ export class AtividadesService {
   private normalizarAtividade(atividade: Atividade): Atividade {
     return {
       ...atividade,
+      codigoReferencia: atividade.codigoReferencia ?? '',
+      tipo: atividade.tipo ?? TipoAtividade.HU,
+      atividadePaiId: atividade.atividadePaiId ?? null,
+      dataConclusao: atividade.dataConclusao ?? null,
       etiquetas: this.normalizarEtiquetas(atividade.etiquetas as unknown[]),
       checklist: Array.isArray(atividade.checklist) ? atividade.checklist : [],
       comentarios: Array.isArray(atividade.comentarios) ? atividade.comentarios : [],

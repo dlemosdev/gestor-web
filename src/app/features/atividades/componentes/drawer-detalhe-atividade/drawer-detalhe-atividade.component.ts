@@ -30,6 +30,7 @@ import { FormularioAtividadeComponent } from '../formulario-atividade/formulario
             [atividade]="atividade()!"
             [responsaveis]="responsaveis()"
             [opcoesRaias]="opcoesRaias()"
+            [historiasUsuarioDisponiveis]="historiasUsuarioDisponiveis()"
             [modoCriacao]="modoCriacao()"
             (salvar)="salvarAtividade.emit($event)"
           />
@@ -52,14 +53,18 @@ import { FormularioAtividadeComponent } from '../formulario-atividade/formulario
             <section class="rounded-2xl border border-borda bg-superficie-secundaria p-4">
               <h4 class="text-sm font-semibold text-cor-texto">Histórico (mock)</h4>
               <ul class="mt-3 list-disc space-y-1.5 pl-4 text-xs text-cor-texto-secundaria">
+                <li>Código: {{ atividade()!.codigoReferencia || 'Será gerado ao cadastrar' }}</li>
                 <li>Atividade criada em {{ atividade()!.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</li>
+                @if (atividade()!.dataConclusao) {
+                  <li>Concluída em {{ atividade()!.dataConclusao | date: 'dd/MM/yyyy HH:mm' }}</li>
+                }
                 <li>Última atualização em {{ atividade()!.atualizadoEm | date: 'dd/MM/yyyy HH:mm' }}</li>
               </ul>
             </section>
           }
 
           <div class="flex justify-end gap-2 border-t border-borda pt-4">
-            @if (!modoCriacao()) {
+            @if (!modoCriacao() && !atividade()!.dataConclusao) {
               <app-botao-ui texto="Excluir" variante="perigo" (click)="excluirAtividade.emit(atividade()!.id)" />
             }
             <app-botao-ui texto="Fechar" variante="secundario" (click)="fechar.emit()" />
@@ -74,6 +79,7 @@ export class DrawerDetalheAtividadeComponent {
   readonly atividade = input<Atividade | null>(null);
   readonly responsaveis = input<OpcaoSeletorUi[]>([]);
   readonly opcoesRaias = input<OpcaoSeletorUi[]>([]);
+  readonly historiasUsuarioDisponiveis = input<Atividade[]>([]);
   readonly modoCriacao = input(false);
 
   readonly fechar = output<void>();

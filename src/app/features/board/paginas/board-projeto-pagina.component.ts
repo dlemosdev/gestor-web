@@ -6,6 +6,7 @@ import { AcoesInterfaceService } from '../../../core/services/acoes-interface.se
 import { Atividade } from '../../../models/atividade.model';
 import { Prioridade } from '../../../models/enums/prioridade.enum';
 import { StatusAtividade } from '../../../models/enums/status-atividade.enum';
+import { TipoAtividade } from '../../../models/enums/tipo-atividade.enum';
 import { OpcaoSeletorUi } from '../../../shared/ui/seletor/seletor-ui.component';
 import { AtividadesService } from '../../../services/atividades.service';
 import { RaiasService } from '../../../services/raias.service';
@@ -98,6 +99,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
       [atividade]="atividadeNoDrawer()"
       [responsaveis]="opcoesResponsaveis()"
       [opcoesRaias]="opcoesRaias()"
+      [historiasUsuarioDisponiveis]="historiasUsuarioRelacionaveis()"
       [modoCriacao]="modoCriacaoAtividade()"
       (fechar)="fecharDetalhes()"
       (salvarAtividade)="salvarAtividade($event)"
@@ -138,6 +140,11 @@ export class BoardProjetoPaginaComponent {
   );
   readonly opcoesRaias = computed<OpcaoSeletorUi[]>(() =>
     this.raiasProjeto().map((raia) => ({ valor: raia.id, rotulo: raia.nome })),
+  );
+  readonly historiasUsuarioRelacionaveis = computed(() =>
+    this.atividadesProjeto()
+      .filter((atividade) => atividade.tipo === TipoAtividade.HU)
+      .sort((a, b) => a.codigoReferencia.localeCompare(b.codigoReferencia)),
   );
   readonly responsaveisFiltroRapido = computed(() => {
     const contagemPorResponsavel = new Map<string, number>();
@@ -366,6 +373,12 @@ export class BoardProjetoPaginaComponent {
     }
 
     const atividadeArrastada = evento.item.data as Atividade;
+    const raiaOrigem = this.raiasProjeto().find((raia) => raia.id === atividadeArrastada.raiaId);
+
+    if (raiaOrigem && this.raiaEhConcluida(raiaOrigem.nome)) {
+      return;
+    }
+
     this.atividadesService.moverAtividade(evento, raiaDestinoId, atividadeArrastada.raiaId);
   }
 
@@ -383,12 +396,16 @@ export class BoardProjetoPaginaComponent {
       id: crypto.randomUUID(),
       projetoId: this.idProjetoRota,
       raiaId: primeiraRaia.id,
+      codigoReferencia: '',
+      tipo: TipoAtividade.HU,
+      atividadePaiId: null,
       titulo: '',
       descricao: '',
       prioridade: Prioridade.MEDIA,
       status: StatusAtividade.BACKLOG,
       responsavel: responsavelPadrao,
       prazo: new Date().toISOString().slice(0, 10),
+      dataConclusao: null,
       etiquetas: [],
       checklist: [],
       comentarios: [],
@@ -396,5 +413,9 @@ export class BoardProjetoPaginaComponent {
       criadoEm: new Date().toISOString(),
       atualizadoEm: new Date().toISOString(),
     });
+  }
+
+  private raiaEhConcluida(nomeRaia: string): boolean {
+    return nomeRaia.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase() === 'concluidas';
   }
 }

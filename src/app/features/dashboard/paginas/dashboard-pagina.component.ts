@@ -1,7 +1,6 @@
 ﻿import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
 import { Projeto } from '../../../models/projeto.model';
-import { StatusAtividade } from '../../../models/enums/status-atividade.enum';
 import { AtividadesService } from '../../../services/atividades.service';
 import { ProjetosService } from '../../../services/projetos.service';
 import { RaiasService } from '../../../services/raias.service';
@@ -12,6 +11,12 @@ interface ProjetoComResumo {
   totalAtividades: number;
   concluidas: number;
   percentualConcluido: number;
+}
+
+interface ResumoRaiaDashboard {
+  nome: string;
+  total: number;
+  classesBadge: string;
 }
 
 @Component({
@@ -41,7 +46,7 @@ interface ProjetoComResumo {
         </div>
       </article>
 
-      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
           <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Projetos cadastrados</p>
           <p class="mt-3 text-3xl font-semibold text-cor-texto">{{ totalProjetos() }}</p>
@@ -61,9 +66,15 @@ interface ProjetoComResumo {
         </article>
 
         <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Bloqueadas</p>
-          <p class="mt-3 text-3xl font-semibold text-rose-400">{{ totalBloqueadas() }}</p>
-          <p class="mt-2 text-xs text-cor-texto-secundaria">Atividades que exigem acao imediata</p>
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Em teste</p>
+          <p class="mt-3 text-3xl font-semibold text-amber-300">{{ totalEmTeste() }}</p>
+          <p class="mt-2 text-xs text-cor-texto-secundaria">Itens na etapa de validacao final</p>
+        </article>
+
+        <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
+          <p class="text-xs font-semibold uppercase tracking-wide text-cor-texto-secundaria">Aguardando publicacao</p>
+          <p class="mt-3 text-3xl font-semibold text-sky-300">{{ totalAguardandoPublicacao() }}</p>
+          <p class="mt-2 text-xs text-cor-texto-secundaria">Entregas prontas aguardando liberar</p>
         </article>
       </section>
 
@@ -109,26 +120,16 @@ interface ProjetoComResumo {
 
         <div class="grid grid-cols-1 gap-5">
           <article class="rounded-2xl border border-borda bg-superficie p-5 shadow-[var(--sombra-card)]">
-            <h3 class="text-base font-semibold text-cor-texto">Distribuicao de status</h3>
-            <p class="mt-1 text-xs text-cor-texto-secundaria">Panorama operacional das atividades.</p>
+            <h3 class="text-base font-semibold text-cor-texto">Distribuicao por raias</h3>
+            <p class="mt-1 text-xs text-cor-texto-secundaria">Panorama das 5 etapas padrao do fluxo atual.</p>
 
             <div class="mt-4 space-y-3">
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
-                <span class="text-sm text-cor-texto">Backlog</span>
-                <span class="rounded-lg border border-borda bg-superficie px-2 py-1 text-xs font-semibold text-cor-texto">{{ totalBacklog() }}</span>
-              </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
-                <span class="text-sm text-cor-texto">Em andamento</span>
-                <span class="rounded-lg bg-blue-500/15 px-2 py-1 text-xs font-semibold text-blue-300">{{ totalEmAndamento() }}</span>
-              </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
-                <span class="text-sm text-cor-texto">Bloqueadas</span>
-                <span class="rounded-lg bg-rose-500/15 px-2 py-1 text-xs font-semibold text-rose-300">{{ totalBloqueadas() }}</span>
-              </div>
-              <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
-                <span class="text-sm text-cor-texto">Concluidas</span>
-                <span class="rounded-lg bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-300">{{ totalConcluidas() }}</span>
-              </div>
+              @for (resumo of resumoPorRaia(); track resumo.nome) {
+                <div class="flex items-center justify-between rounded-xl border border-borda bg-superficie-secundaria/60 px-3 py-2.5">
+                  <span class="text-sm text-cor-texto">{{ resumo.nome }}</span>
+                  <span class="rounded-lg px-2 py-1 text-xs font-semibold" [class]="resumo.classesBadge">{{ resumo.total }}</span>
+                </div>
+              }
             </div>
           </article>
         </div>
@@ -137,6 +138,8 @@ interface ProjetoComResumo {
   `,
 })
 export class DashboardPaginaComponent {
+  private readonly nomesRaiasPadrao = ['Backlog', 'Em andamento', 'Teste', 'Aguardando publicacao', 'Concluidas'] as const;
+
   private readonly projetosService = inject(ProjetosService);
   private readonly raiasService = inject(RaiasService);
   private readonly atividadesService = inject(AtividadesService);
@@ -151,19 +154,26 @@ export class DashboardPaginaComponent {
   readonly totalAtividades = computed(() => this.atividadesService.atividades().length);
 
   readonly totalBacklog = computed(
-    () => this.atividadesService.atividades().filter((atividade) => atividade.status === StatusAtividade.BACKLOG).length,
+    () => this.totalAtividadesPorNomeRaia('Backlog'),
   );
   readonly totalEmAndamento = computed(
-    () =>
-      this.atividadesService
-        .atividades()
-        .filter((atividade) => atividade.status === StatusAtividade.EM_ANDAMENTO).length,
+    () => this.totalAtividadesPorNomeRaia('Em andamento'),
   );
-  readonly totalBloqueadas = computed(
-    () => this.atividadesService.atividades().filter((atividade) => atividade.status === StatusAtividade.BLOQUEADA).length,
+  readonly totalEmTeste = computed(
+    () => this.totalAtividadesPorNomeRaia('Teste'),
+  );
+  readonly totalAguardandoPublicacao = computed(
+    () => this.totalAtividadesPorNomeRaia('Aguardando publicacao'),
   );
   readonly totalConcluidas = computed(
-    () => this.atividadesService.atividades().filter((atividade) => atividade.status === StatusAtividade.CONCLUIDA).length,
+    () => this.totalAtividadesPorNomeRaia('Concluidas'),
+  );
+  readonly resumoPorRaia = computed<ResumoRaiaDashboard[]>(() =>
+    this.nomesRaiasPadrao.map((nome) => ({
+      nome,
+      total: this.totalAtividadesPorNomeRaia(nome),
+      classesBadge: this.obterClassesBadgeRaia(nome),
+    })),
   );
 
   readonly percentualConcluidoGeral = computed(() => {
@@ -184,7 +194,13 @@ export class DashboardPaginaComponent {
           .filter((atividade) => atividade.projetoId === projeto.id);
 
         const totalAtividades = atividadesProjeto.length;
-        const concluidas = atividadesProjeto.filter((atividade) => atividade.status === StatusAtividade.CONCLUIDA).length;
+        const raiasConcluidas = new Set(
+          this.raiasService
+            .obterRaiasPorProjeto(projeto.id)
+            .filter((raia) => this.normalizarNomeRaia(raia.nome) === 'concluidas')
+            .map((raia) => raia.id),
+        );
+        const concluidas = atividadesProjeto.filter((atividade) => raiasConcluidas.has(atividade.raiaId)).length;
         const percentualConcluido = totalAtividades === 0 ? 0 : Math.round((concluidas / totalAtividades) * 100);
 
         return {
@@ -201,4 +217,36 @@ export class DashboardPaginaComponent {
     const projetoPrincipal = this.projetosService.obterProjetoPrincipal() ?? this.projetos()[0];
     return projetoPrincipal ? ['/projetos', projetoPrincipal.id, 'board'] : '/projetos';
   });
+
+  private totalAtividadesPorNomeRaia(nomeRaia: string): number {
+    const raiasIds = new Set(
+      this.raiasService
+        .raias()
+        .filter((raia) => this.normalizarNomeRaia(raia.nome) === this.normalizarNomeRaia(nomeRaia))
+        .map((raia) => raia.id),
+    );
+
+    return this.atividadesService.atividades().filter((atividade) => raiasIds.has(atividade.raiaId)).length;
+  }
+
+  private obterClassesBadgeRaia(nomeRaia: string): string {
+    switch (nomeRaia) {
+      case 'Backlog':
+        return 'border border-borda bg-superficie text-cor-texto';
+      case 'Em andamento':
+        return 'bg-blue-500/15 text-blue-300';
+      case 'Teste':
+        return 'bg-amber-500/15 text-amber-300';
+      case 'Aguardando publicacao':
+        return 'bg-sky-500/15 text-sky-300';
+      case 'Concluidas':
+        return 'bg-emerald-500/15 text-emerald-300';
+      default:
+        return 'border border-borda bg-superficie text-cor-texto';
+    }
+  }
+
+  private normalizarNomeRaia(nomeRaia: string): string {
+    return nomeRaia.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
+  }
 }

@@ -29,22 +29,34 @@ import { DialogoConfirmacaoUiComponent } from '../../../../shared/ui/dialogo-con
       (cdkDragStarted)="arrastando.set(true)"
       (cdkDragEnded)="finalizarArraste()"
     >
-      <button
-        type="button"
-        class="absolute right-2.5 top-2.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent bg-transparent text-red-500 transition hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-        (click)="abrirModalExclusao($event)"
-        aria-label="Excluir atividade"
-        title="Excluir atividade"
-      >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M3 6h18" />
-          <path d="M8 6V4h8v2" />
-          <path d="M19 6l-1 14H6L5 6" />
-          <path d="M10 11v6M14 11v6" />
-        </svg>
-      </button>
+      @if (!atividadeConcluida()) {
+        <button
+          type="button"
+          class="absolute right-2.5 top-2.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent bg-transparent text-red-500 transition hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          (click)="abrirModalExclusao($event)"
+          aria-label="Excluir atividade"
+          title="Excluir atividade"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6M14 11v6" />
+          </svg>
+        </button>
+      }
 
-      <h4 class="line-clamp-2 pr-7 text-sm font-semibold text-cor-texto">{{ atividade().titulo }}</h4>
+      <h4
+        class="line-clamp-2 pr-7 text-sm font-semibold text-cor-texto"
+        [class.line-through]="atividade().dataConclusao"
+        [class.text-cor-texto-secundaria]="atividade().dataConclusao"
+      >
+        {{ atividade().titulo }}
+      </h4>
+      <div class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-cor-texto-suave">
+        <span class="rounded-md border border-borda bg-superficie-secundaria px-2 py-1">{{ atividade().codigoReferencia || 'Novo' }}</span>
+        <span class="rounded-md border border-borda bg-superficie-secundaria px-2 py-1">{{ atividade().tipo }}</span>
+      </div>
       <p class="mt-1.5 line-clamp-2 text-xs leading-5 text-cor-texto-secundaria">{{ atividade().descricao }}</p>
 
       <div class="mt-3.5 flex flex-wrap gap-1.5">
@@ -65,6 +77,12 @@ import { DialogoConfirmacaoUiComponent } from '../../../../shared/ui/dialogo-con
         <span>{{ atividade().responsavel }}</span>
         <span>{{ atividade().prazo | date: 'dd/MM' }}</span>
       </footer>
+
+      @if (atividade().dataConclusao) {
+        <div class="mt-2 text-[11px] font-semibold text-emerald-300">
+          Concluída em {{ atividade().dataConclusao | date: 'dd/MM/yyyy' }}
+        </div>
+      }
     </article>
 
     <app-dialogo-confirmacao-ui
@@ -117,6 +135,7 @@ export class CardAtividadeComponent {
   readonly arrastando = signal(false);
   readonly momentoFimArraste = signal(0);
   readonly modalExclusaoAberto = signal(false);
+  readonly atividadeConcluida = computed(() => Boolean(this.atividade().dataConclusao));
 
   readonly variantePrioridade = computed<'neutro' | 'info' | 'alerta' | 'critico'>(() => {
     const prioridade = this.atividade().prioridade;

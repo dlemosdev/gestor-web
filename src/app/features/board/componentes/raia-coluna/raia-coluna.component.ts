@@ -88,7 +88,7 @@ export interface EventoSoltarAtividade {
         @for (atividade of atividades(); track atividade.id) {
           <app-card-atividade
             [atividade]="atividade"
-            [arrastarDesabilitado]="arrastarDesabilitado()"
+            [arrastarDesabilitado]="arrastarDesabilitado() || raiaEhConcluida()"
             (abrirDetalhes)="abrirDetalhesAtividade.emit($event)"
             (excluirAtividade)="excluirAtividade.emit($event)"
           />
@@ -120,6 +120,10 @@ export class RaiaColunaComponent {
 
   readonly modoEdicaoNome = signal(false);
   readonly modalExclusaoAberto = signal(false);
+
+  raiaEhConcluida(): boolean {
+    return this.raia().nome.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase() === 'concluidas';
+  }
 
   textoContadorAtividades(): string {
     const total = this.atividades().length;
