@@ -16,9 +16,13 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
     @if (aberto() && atividade()) {
       <div class="fixed inset-0 z-[85] bg-slate-950/60 backdrop-blur-[3px]" aria-hidden="true" (click)="fechar.emit()"></div>
 
-      <section class="fixed inset-0 z-[90] overflow-y-auto p-4" role="dialog" aria-modal="true" aria-label="Detalhes da atividade">
-        <div class="mx-auto w-full max-w-5xl rounded-[2rem] border border-borda bg-superficie shadow-[var(--sombra-suave)]">
-          <header class="border-b border-borda px-6 py-6">
+      <section class="fixed inset-0 z-[90] p-4" role="dialog" aria-modal="true" aria-label="Detalhes da atividade">
+        <div class="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-borda bg-superficie shadow-[var(--sombra-suave)]">
+          <header class="relative shrink-0 overflow-hidden bg-[linear-gradient(0deg,rgba(37,99,235,0.18)_0%,rgba(59,130,246,0.10)_24%,rgba(255,255,255,0.05)_52%,rgba(15,23,42,0.02)_100%)] px-6 pt-6 pb-5">
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_46%,rgba(255,255,255,0)_100%)]"
+            ></div>
             <div class="flex flex-wrap items-start justify-between gap-4">
               <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cor-texto-secundaria">Detalhes da atividade</p>
@@ -38,14 +42,14 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
               </div>
 
               <div class="flex items-center gap-2">
-                <app-botao-ui texto="Editar" variante="secundario" (click)="editar.emit(atividade()!)" />
-                <app-botao-ui texto="Fechar" variante="secundario" (click)="fechar.emit()" />
+                <app-botao-ui texto="Editar" icone="edit" variante="secundario" (click)="editar.emit(atividade()!)" />
+                <app-botao-ui texto="Fechar" icone="close" variante="secundario" (click)="fechar.emit()" />
               </div>
             </div>
           </header>
 
-          <div class="grid grid-cols-1 gap-0 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <main class="min-w-0 px-6 py-6">
+          <div class="grid min-h-0 flex-1 grid-cols-1 gap-0 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <main class="min-w-0 overflow-y-auto px-6 pt-5 pb-6">
               <section class="grid grid-cols-2 gap-4 border-b border-borda pb-6 sm:grid-cols-4">
                 <div>
                   <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-cor-texto-suave">Responsavel</p>
@@ -140,8 +144,9 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
               </section>
             </main>
 
-            <aside class="border-t border-borda bg-superficie-secundaria/25 px-6 py-6 xl:border-l xl:border-t-0">
-              <section>
+            <aside class="min-h-0 overflow-y-auto border-t border-borda bg-superficie-secundaria/20 px-5 py-5 xl:border-l xl:border-t-0">
+              <div class="flex min-h-full flex-col gap-4">
+              <section class="rounded-2xl border border-borda bg-superficie-secundaria/35 px-4 py-4">
                 <h4 class="text-sm font-semibold text-cor-texto">Contexto</h4>
                 <dl class="mt-4 space-y-4">
                   <div>
@@ -157,7 +162,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
                 </dl>
               </section>
 
-              <section class="mt-8">
+              <section class="rounded-2xl border border-borda bg-superficie-secundaria/35 px-4 py-4">
                 <div class="flex items-center justify-between gap-3">
                   <h4 class="text-sm font-semibold text-cor-texto">Etiquetas</h4>
                   <span class="text-xs text-cor-texto-suave">{{ atividade()!.etiquetas.length }}</span>
@@ -181,7 +186,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
                 }
               </section>
 
-              <section class="mt-8">
+              <section class="rounded-2xl border border-borda bg-superficie-secundaria/35 px-4 py-4">
                 <div class="flex items-center justify-between gap-3">
                   <h4 class="text-sm font-semibold text-cor-texto">Historico</h4>
                   <span class="text-xs text-cor-texto-suave">{{ historico().length + 1 }}</span>
@@ -202,6 +207,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
                   }
                 </ol>
               </section>
+              </div>
             </aside>
           </div>
         </div>

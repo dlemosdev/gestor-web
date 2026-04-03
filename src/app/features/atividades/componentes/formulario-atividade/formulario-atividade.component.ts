@@ -198,10 +198,15 @@ interface CorEtiqueta {
 
           <button
             type="button"
-            class="inline-flex h-11 items-center justify-center rounded-xl border border-borda px-3 text-sm font-semibold text-cor-texto-secundaria transition hover:border-borda-forte hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
+            class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-borda text-cor-texto-secundaria transition hover:border-borda-forte hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
             (click)="adicionarEtiqueta()"
+            aria-label="Adicionar etiqueta"
+            title="Adicionar etiqueta"
           >
-            Adicionar
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
           </button>
         </div>
 
@@ -281,6 +286,7 @@ interface CorEtiqueta {
         <app-botao-ui
           tipo="submit"
           [texto]="modoCriacao() ? 'Criar atividade' : 'Salvar alteracoes'"
+          [icone]="modoCriacao() ? 'plus' : 'save'"
           [desabilitado]="formularioAtividade.invalid"
         />
       </div>
@@ -525,6 +531,7 @@ export class FormularioAtividadeComponent {
   removerEtiqueta(nomeEtiqueta: string): void {
     this.etiquetasEditadas.update((etiquetas) => etiquetas.filter((item) => item.nome !== nomeEtiqueta));
   }
+
 
   private atualizarValidacaoVinculoHu(tipo: TipoAtividade): void {
     const controle = this.formularioAtividade.controls.atividadePaiId;

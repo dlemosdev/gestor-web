@@ -17,7 +17,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
         class="entrada-criacao-atividade h-10 w-full rounded-lg border border-borda bg-superficie px-2.5 text-sm outline-none focus:border-primaria"
       />
       <div class="mt-2 flex justify-end">
-        <app-botao-ui texto="Adicionar" tamanho="sm" variante="secundario" [desabilitado]="formularioAtividade.invalid" />
+        <app-botao-ui texto="Adicionar" icone="plus" tamanho="sm" variante="secundario" [desabilitado]="formularioAtividade.invalid" />
       </div>
     </form>
   `,

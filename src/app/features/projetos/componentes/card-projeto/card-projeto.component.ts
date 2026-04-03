@@ -110,10 +110,10 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
       </div>
 
       <div class="mt-4 flex flex-wrap gap-2">
-        <app-botao-ui texto="Abrir Board" tamanho="sm" [rota]="['/projetos', projeto().id, 'board']" />
-        <app-botao-ui texto="Editar" tamanho="sm" variante="secundario" (click)="editarProjeto.emit(projeto())" />
+        <app-botao-ui texto="Abrir Board" icone="board" tamanho="sm" [rota]="['/projetos', projeto().id, 'board']" />
+        <app-botao-ui texto="Editar" icone="edit" tamanho="sm" variante="secundario" (click)="editarProjeto.emit(projeto())" />
         @if (projeto().status === statusProjeto.INATIVO) {
-          <app-botao-ui texto="Ativar" tamanho="sm" (click)="ativarProjeto.emit(projeto())" />
+          <app-botao-ui texto="Ativar" icone="check" tamanho="sm" (click)="ativarProjeto.emit(projeto())" />
         }
       </div>
     </section>

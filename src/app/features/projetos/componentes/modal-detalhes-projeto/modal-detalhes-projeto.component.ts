@@ -74,7 +74,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
           </div>
 
           <div class="mt-6 flex justify-end">
-            <app-botao-ui texto="Fechar" variante="secundario" (click)="fechar.emit()" />
+            <app-botao-ui texto="Fechar" icone="close" variante="secundario" (click)="fechar.emit()" />
           </div>
         </div>
       </section>

@@ -4,14 +4,20 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { EstadoSidebarService } from '../../core/services/estado-sidebar.service';
-import { AcoesInterfaceService } from '../../core/services/acoes-interface.service';
 import { ProjetosService } from '../../services/projetos.service';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
   template: `
-    <header class="relative bg-superficie/92 backdrop-blur-md" role="banner">
+    <header
+      class="relative overflow-hidden bg-[linear-gradient(0deg,rgba(37,99,235,0.18)_0%,rgba(59,130,246,0.10)_24%,rgba(255,255,255,0.05)_52%,rgba(15,23,42,0.02)_100%)] backdrop-blur-md"
+      role="banner"
+    >
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_46%,rgba(255,255,255,0)_100%)]"
+      ></div>
       <div class="flex h-[3.75rem] min-w-0">
         <div
           class="relative flex shrink-0 items-center justify-center transition-[width,padding] duration-200"
@@ -50,28 +56,8 @@ import { ProjetosService } from '../../services/projetos.service';
             <h2 class="truncate text-lg font-semibold text-cor-texto md:text-xl">{{ tituloPagina() }}</h2>
           </div>
 
-          @if (estaNoBoard()) {
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="inline-flex h-9 items-center rounded-xl border border-transparent bg-primaria px-3 text-sm font-semibold text-white transition hover:bg-primaria-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
-                (click)="solicitarNovaAtividade()"
-              >
-                Nova Atividade
-              </button>
-            </div>
-          }
         </div>
       </div>
-
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-borda-forte/90 to-transparent"
-      ></div>
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 -bottom-1 h-3 bg-gradient-to-b from-superficie-secundaria/35 to-transparent"
-      ></div>
     </header>
   `,
 })
@@ -79,7 +65,6 @@ export class TopbarComponent {
   private readonly roteador = inject(Router);
   private readonly projetosService = inject(ProjetosService);
   private readonly estadoSidebarService = inject(EstadoSidebarService);
-  private readonly acoesInterfaceService = inject(AcoesInterfaceService);
 
   private readonly urlAtual = toSignal(
     this.roteador.events.pipe(
@@ -114,11 +99,6 @@ export class TopbarComponent {
   alternarSidebar(): void {
     this.estadoSidebarService.alternarSidebar();
   }
-
-  solicitarNovaAtividade(): void {
-    this.acoesInterfaceService.solicitarNovaAtividade();
-  }
-
   private nomeProjetoAtual(): string | null {
     const url = this.urlAtual();
     const correspondencia = url.match(/\/projetos\/([^/]+)\/board/);

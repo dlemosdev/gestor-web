@@ -37,6 +37,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
         />
         <app-botao-ui
           texto="Enviar"
+          icone="send"
           tamanho="sm"
           variante="secundario"
           (click)="adicionarComentario(inputComentario.value); inputComentario.value = ''"

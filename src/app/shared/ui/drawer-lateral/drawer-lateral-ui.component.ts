@@ -18,9 +18,13 @@
           <button
             type="button"
             aria-label="Fechar painel lateral"
-            class="rounded-lg border border-borda bg-superficie-secundaria px-2.5 py-1.5 text-sm text-cor-texto hover:border-borda-forte hover:bg-superficie focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
+            class="inline-flex items-center gap-2 rounded-lg border border-borda bg-superficie-secundaria px-2.5 py-1.5 text-sm text-cor-texto hover:border-borda-forte hover:bg-superficie focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
             (click)="fechar.emit()"
           >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
             Fechar
           </button>
         </header>

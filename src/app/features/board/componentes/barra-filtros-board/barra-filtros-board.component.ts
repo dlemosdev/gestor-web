@@ -80,8 +80,8 @@ export interface FiltrosBoard {
       </div>
 
       <div class="flex justify-end gap-2 border-t border-borda pt-4">
-        <app-botao-ui texto="Limpar filtros" variante="secundario" tamanho="sm" (click)="limparFiltros()" />
-        <app-botao-ui texto="Pesquisar" tamanho="sm" tipo="submit" />
+        <app-botao-ui texto="Limpar filtros" icone="filter-x" variante="secundario" tamanho="sm" (click)="limparFiltros()" />
+        <app-botao-ui texto="Pesquisar" icone="search" tamanho="sm" tipo="submit" />
       </div>
     </form>
   `,

@@ -32,7 +32,7 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
           </div>
         }
 
-        <section class="flex flex-wrap items-center gap-2 px-3 py-2.5">
+        <section class="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
           <div class="flex flex-wrap items-center gap-2">
             <button type="button" class="inline-flex h-9 items-center rounded-xl border px-3 text-xs font-semibold transition" [class.border-primaria]="filtroResponsavelAtivo() === ''" [class.bg-primaria]="filtroResponsavelAtivo() === ''" [class.text-white]="filtroResponsavelAtivo() === ''" [class.border-borda]="filtroResponsavelAtivo() !== ''" [class.bg-superficie]="filtroResponsavelAtivo() !== ''" [class.text-cor-texto-secundaria]="filtroResponsavelAtivo() !== ''" (click)="aplicarFiltroRapidoResponsavel('')">
               Todos responsaveis
@@ -47,6 +47,20 @@ import { QuadroRaiasComponent, RaiaComAtividades } from '../componentes/quadro-r
               </button>
             }
           </div>
+
+          <button
+            type="button"
+            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-transparent bg-primaria text-white transition hover:bg-primaria-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria disabled:cursor-not-allowed disabled:opacity-60"
+            (click)="iniciarCriacaoAtividade()"
+            [disabled]="projetoConcluido()"
+            aria-label="Nova atividade"
+            title="Nova atividade"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </button>
         </section>
 
         <app-quadro-raias
@@ -151,6 +165,10 @@ export class BoardProjetoPaginaComponent {
 
   constructor() {
     this.raiasService.carregarRaiasProjeto(this.idProjetoRota);
+    this.ultimoPedidoNovaAtividadeProcessado = this.acoesInterfaceService.solicitacaoNovaAtividade();
+    this.fecharModalDetalhes();
+    this.fecharDrawerEdicao();
+
     effect(() => {
       const pedidoAtual = this.acoesInterfaceService.solicitacaoNovaAtividade();
       if (pedidoAtual > this.ultimoPedidoNovaAtividadeProcessado) {

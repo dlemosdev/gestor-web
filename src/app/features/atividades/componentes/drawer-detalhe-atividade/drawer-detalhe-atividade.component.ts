@@ -38,9 +38,9 @@ import { FormularioAtividadeComponent } from '../formulario-atividade/formulario
 
             <div class="flex justify-end gap-2 border-t border-borda pt-4">
               @if (!atividade()!.dataConclusao) {
-                <app-botao-ui texto="Excluir" variante="perigo" (click)="excluirAtividade.emit(atividade()!.id)" />
+                <app-botao-ui texto="Excluir" icone="trash" variante="perigo" (click)="excluirAtividade.emit(atividade()!.id)" />
               }
-              <app-botao-ui texto="Fechar" variante="secundario" (click)="fechar.emit()" />
+              <app-botao-ui texto="Fechar" icone="close" variante="secundario" (click)="fechar.emit()" />
             </div>
           }
         </section>

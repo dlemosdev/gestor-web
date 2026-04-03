@@ -91,10 +91,11 @@ export interface DadosFormularioProjeto {
         }
 
         <div class="md:col-span-2 flex justify-end gap-2 pt-2">
-          <app-botao-ui texto="Cancelar" variante="secundario" (click)="cancelarEdicao.emit()" />
+          <app-botao-ui texto="Cancelar" icone="close" variante="secundario" (click)="cancelarEdicao.emit()" />
           <app-botao-ui
             tipo="submit"
             [texto]="projetoEdicao() ? 'Salvar alterações' : 'Criar projeto'"
+            [icone]="projetoEdicao() ? 'save' : 'plus'"
             [desabilitado]="formularioProjeto.invalid || (!projetoEdicao() && raiasSelecionadas().length === 0)"
           />
         </div>

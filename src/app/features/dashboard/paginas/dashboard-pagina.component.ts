@@ -41,8 +41,8 @@ interface ResumoRaiaDashboard {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <app-botao-ui texto="Ver projetos" variante="secundario" rota="/projetos" />
-            <app-botao-ui texto="Abrir board principal" [rota]="rotaBoardPrincipal()" />
+            <app-botao-ui texto="Ver projetos" icone="folder" variante="secundario" rota="/projetos" />
+            <app-botao-ui texto="Abrir board principal" icone="board" [rota]="rotaBoardPrincipal()" />
           </div>
         </div>
       </article>
@@ -107,7 +107,7 @@ interface ResumoRaiaDashboard {
                 </div>
 
                 <div class="mt-3 flex justify-end">
-                  <app-botao-ui tamanho="sm" texto="Abrir board" [rota]="['/projetos', item.projeto.id, 'board']" />
+                  <app-botao-ui tamanho="sm" texto="Abrir board" icone="board" [rota]="['/projetos', item.projeto.id, 'board']" />
                 </div>
               </article>
             } @empty {

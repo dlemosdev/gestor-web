@@ -12,7 +12,7 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
   imports: [ItemSidebarUiComponent, AvatarUiComponent],
   template: `
     <aside
-      class="relative hidden h-full min-h-0 shrink-0 bg-superficie/92 py-3.5 backdrop-blur-md transition-[width,padding] duration-200 lg:flex lg:flex-col"
+      class="relative hidden h-full min-h-0 shrink-0 overflow-hidden bg-[linear-gradient(270deg,rgba(37,99,235,0.18)_0%,rgba(59,130,246,0.10)_24%,rgba(255,255,255,0.05)_52%,rgba(15,23,42,0.02)_100%)] py-3.5 backdrop-blur-md transition-[width,padding] duration-200 lg:flex lg:flex-col"
       [class.w-60]="!sidebarRecolhida()"
       [class.w-20]="sidebarRecolhida()"
       [class.px-4]="!sidebarRecolhida()"
@@ -20,25 +20,22 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
     >
       <div
         aria-hidden="true"
-        class="pointer-events-none absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-borda-forte/80 to-transparent"
-      ></div>
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute -right-[1px] top-0 h-full w-4 bg-gradient-to-r from-superficie-secundaria/40 to-transparent"
+        class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_46%,rgba(255,255,255,0)_100%)]"
       ></div>
 
       <div class="flex min-h-0 flex-1 flex-col">
-        <nav class="flex flex-1 flex-col gap-1.5 overflow-y-auto pt-2 pr-1" aria-label="Menu principal">
+        <nav class="flex flex-1 flex-col gap-1.5 overflow-y-auto pt-2" [class.pr-1]="!sidebarRecolhida()" [class.items-center]="sidebarRecolhida()" aria-label="Menu principal">
           <app-item-sidebar-ui titulo="Dashboard" rota="/dashboard" icone="dashboard" [compacto]="sidebarRecolhida()" />
           <app-item-sidebar-ui titulo="Projetos" rota="/projetos" icone="projetos" [compacto]="sidebarRecolhida()" />
         </nav>
 
-        <div class="mt-3 border-t border-borda pt-3 space-y-2">
+        <div class="mt-3 space-y-2 border-t border-borda pt-3" [class.items-center]="sidebarRecolhida()" [class.flex]="sidebarRecolhida()" [class.flex-col]="sidebarRecolhida()">
           <button
             type="button"
             class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:border-borda-forte hover:bg-superficie hover:text-cor-texto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
             [class.w-full]="!sidebarRecolhida()"
             [class.w-10]="sidebarRecolhida()"
+            [class.mx-auto]="sidebarRecolhida()"
             [attr.aria-label]="temaEscuroAtivo() ? 'Ativar tema claro' : 'Ativar tema escuro'"
             [attr.title]="temaEscuroAtivo() ? 'Ativar tema claro' : 'Ativar tema escuro'"
             (click)="alternarTemaAparencia()"
@@ -64,6 +61,7 @@ import { ItemSidebarUiComponent } from '../../shared/ui/item-sidebar/item-sideba
             class="inline-flex h-10 items-center justify-center rounded-xl border border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             [class.w-full]="!sidebarRecolhida()"
             [class.w-10]="sidebarRecolhida()"
+            [class.mx-auto]="sidebarRecolhida()"
             aria-label="Sair da conta"
             title="Sair"
             (click)="sair()"

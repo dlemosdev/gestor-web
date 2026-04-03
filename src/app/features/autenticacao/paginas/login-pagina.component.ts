@@ -52,6 +52,7 @@ type EtapaLogin = 'credenciais' | 'segundo-fator';
             <app-botao-ui
               class="block"
               [texto]="carregando() ? 'Entrando...' : 'Continuar'"
+              icone="arrow-right"
               [desabilitado]="formularioLogin.invalid || carregando()"
               [larguraTotal]="true"
               [tipo]="'submit'"
@@ -88,9 +89,10 @@ type EtapaLogin = 'credenciais' | 'segundo-fator';
             }
 
             <div class="grid grid-cols-2 items-stretch gap-2">
-              <app-botao-ui texto="Voltar" variante="secundario" [desabilitado]="carregando()" [larguraTotal]="true" (click)="voltarEtapaCredenciais()" />
+              <app-botao-ui texto="Voltar" icone="back" variante="secundario" [desabilitado]="carregando()" [larguraTotal]="true" (click)="voltarEtapaCredenciais()" />
               <app-botao-ui
                 [texto]="carregando() ? 'Validando...' : 'Validar codigo'"
+                icone="check"
                 [desabilitado]="formularioCodigo.invalid || carregando()"
                 [larguraTotal]="true"
                 [tipo]="'submit'"

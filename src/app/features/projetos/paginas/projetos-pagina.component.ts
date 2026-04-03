@@ -41,7 +41,7 @@ type FiltroProjetoRapido = 'TODOS' | 'CONCLUIDOS' | 'ARQUIVADOS';
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <app-botao-ui texto="Novo Projeto" (click)="abrirCriacaoProjeto()" />
+            <app-botao-ui texto="Novo Projeto" icone="plus" (click)="abrirCriacaoProjeto()" />
           </div>
         </div>
       </article>

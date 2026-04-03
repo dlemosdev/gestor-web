@@ -37,6 +37,7 @@ import { BotaoUiComponent } from '../../../../shared/ui/botao/botao-ui.component
         />
         <app-botao-ui
           texto="Adicionar"
+          icone="plus"
           tamanho="sm"
           variante="secundario"
           (click)="adicionarItem(inputChecklist.value); inputChecklist.value = ''"
