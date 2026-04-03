@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Atividade } from '../../../../models/atividade.model';
@@ -22,28 +22,37 @@ interface CorEtiqueta {
   template: `
     <form [formGroup]="formularioAtividade" class="space-y-5 rounded-2xl border border-borda bg-superficie-secundaria p-4" (ngSubmit)="salvarFormulario()">
       <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <label class="flex flex-col gap-1.5">
-          <span class="text-xs font-semibold text-cor-texto-secundaria">Código</span>
-          <input
-            type="text"
-            [value]="atividade().codigoReferencia || 'Gerado automaticamente ao cadastrar'"
-            readonly
-            class="h-11 rounded-xl border border-borda bg-superficie px-3 text-sm text-cor-texto-secundaria outline-none"
-          />
-        </label>
+        @if (!modoCriacao()) {
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-cor-texto-secundaria">Código</span>
+            <input
+              type="text"
+              [value]="atividade().codigoReferencia || 'Gerado automaticamente ao cadastrar'"
+              readonly
+              class="h-11 rounded-xl border border-borda bg-superficie px-3 text-sm text-cor-texto-secundaria outline-none"
+            />
+          </label>
+        }
 
         <label class="flex flex-col gap-1.5">
           <span class="text-xs font-semibold text-cor-texto-secundaria">Tipo</span>
           @if (modoCriacao()) {
-            <select
-              formControlName="tipo"
-              class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria"
-              (change)="alterarTipo($event)"
-            >
+            <div class="grid grid-cols-3 gap-2 rounded-2xl border border-borda bg-superficie p-1.5">
               @for (opcao of opcoesTipo; track opcao.valor) {
-                <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
+                <button
+                  type="button"
+                  class="inline-flex h-10 items-center justify-center rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaria"
+                  [class.bg-primaria]="tipoSelecionado() === opcao.valor"
+                  [class.text-white]="tipoSelecionado() === opcao.valor"
+                  [class.shadow-sm]="tipoSelecionado() === opcao.valor"
+                  [class.text-cor-texto-secundaria]="tipoSelecionado() !== opcao.valor"
+                  [class.hover:bg-superficie-secundaria]="tipoSelecionado() !== opcao.valor"
+                  (click)="selecionarTipo(opcao.valor)"
+                >
+                  {{ opcao.rotulo }}
+                </button>
               }
-            </select>
+            </div>
           } @else {
             <input
               type="text"
@@ -70,12 +79,68 @@ interface CorEtiqueta {
       @if (tipoSelecionado() !== tipoAtividade.HU) {
         <label class="flex flex-col gap-1.5">
           <span class="text-xs font-semibold text-cor-texto-secundaria">HU vinculada</span>
-          <select formControlName="atividadePaiId" class="h-11 rounded-xl border border-borda px-3 text-sm outline-none focus:border-primaria">
-            <option value="">Selecione a HU</option>
-            @for (opcao of opcoesHistoriaUsuario(); track opcao.valor) {
-              <option [value]="opcao.valor">{{ opcao.rotulo }}</option>
+          <div class="relative" (click)="$event.stopPropagation()">
+            <div class="flex h-11 overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm transition focus-within:border-primaria focus-within:ring-1 focus-within:ring-primaria/30">
+              <span
+                class="inline-flex w-11 flex-none items-center justify-center border-r border-borda bg-superficie-secundaria text-cor-texto-suave"
+                aria-hidden="true"
+                style="border-radius: 0; box-shadow: none;"
+              >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+              </span>
+              <input
+                #inputHu
+                type="text"
+                [value]="filtroHistoriaUsuario()"
+                (focus)="abrirSeletorHu()"
+                (input)="filtrarHistoriaUsuario(inputHu.value)"
+                class="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm outline-none placeholder:text-cor-texto-suave"
+                placeholder="Selecione ou filtre a HU"
+                autocomplete="off"
+                style="border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important;"
+              />
+              <button
+                type="button"
+                class="inline-flex w-11 flex-none items-center justify-center border-l border-borda bg-superficie-secundaria text-cor-texto-secundaria transition hover:text-cor-texto focus-visible:outline-none"
+                style="border-radius: 0; box-shadow: none;"
+                (click)="alternarSeletorHu()"
+                aria-label="Abrir seleção de HU"
+              >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+
+            @if (seletorHuAberto() && opcoesHistoriaUsuario().length > 0) {
+              <div class="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-borda bg-superficie p-1.5 shadow-[var(--sombra-suave)]">
+                <button
+                  type="button"
+                  class="flex w-full items-start rounded-xl px-3 py-2.5 text-left text-sm text-cor-texto-secundaria transition hover:bg-superficie-secundaria"
+                  (click)="limparHistoriaUsuarioSelecionada()"
+                >
+                  Selecione a HU
+                </button>
+
+                @for (opcao of opcoesHistoriaUsuarioFiltradas(); track opcao.valor) {
+                  <button
+                    type="button"
+                    class="flex w-full items-start rounded-xl px-3 py-2.5 text-left text-sm transition"
+                    [class.bg-primaria/10]="formularioAtividade.controls.atividadePaiId.value === opcao.valor"
+                    [class.text-cor-texto]="formularioAtividade.controls.atividadePaiId.value === opcao.valor"
+                    [class.text-cor-texto-secundaria]="formularioAtividade.controls.atividadePaiId.value !== opcao.valor"
+                    [class.hover:bg-superficie-secundaria]="formularioAtividade.controls.atividadePaiId.value !== opcao.valor"
+                    (click)="selecionarHistoriaUsuario(opcao)"
+                  >
+                    {{ opcao.rotulo }}
+                  </button>
+                }
+              </div>
             }
-          </select>
+          </div>
           @if (opcoesHistoriaUsuario().length === 0) {
             <span class="text-xs text-cor-texto-suave">
               @if (tipoSelecionado() === tipoAtividade.BUGFIX) {
@@ -84,6 +149,8 @@ interface CorEtiqueta {
                 Nenhuma HU disponível na raia Concluídas.
               }
             </span>
+          } @else if (opcoesHistoriaUsuarioFiltradas().length === 0) {
+            <span class="text-xs text-cor-texto-suave">Nenhuma HU encontrada para o filtro informado.</span>
           }
         </label>
       }
@@ -234,6 +301,8 @@ export class FormularioAtividadeComponent {
   readonly novaEtiqueta = signal('');
   readonly corEtiquetaSelecionada = signal('#2563EB');
   readonly tipoSelecionado = signal<TipoAtividade>(TipoAtividade.HU);
+  readonly filtroHistoriaUsuario = signal('');
+  readonly seletorHuAberto = signal(false);
 
   readonly coresEtiqueta: CorEtiqueta[] = [
     { nome: 'Azul', valor: '#2563EB' },
@@ -275,6 +344,16 @@ export class FormularioAtividadeComponent {
       })),
   );
 
+  readonly opcoesHistoriaUsuarioFiltradas = computed<OpcaoSeletorUi[]>(() => {
+    const filtro = this.filtroHistoriaUsuario().trim().toLowerCase();
+
+    if (!filtro) {
+      return this.opcoesHistoriaUsuario();
+    }
+
+    return this.opcoesHistoriaUsuario().filter((opcao) => opcao.rotulo.toLowerCase().includes(filtro));
+  });
+
   readonly formularioAtividade = this.fb.group({
     tipo: [TipoAtividade.HU, Validators.required],
     atividadePaiId: [''],
@@ -296,6 +375,7 @@ export class FormularioAtividadeComponent {
       this.novaEtiqueta.set('');
       this.corEtiquetaSelecionada.set('#2563EB');
       this.tipoSelecionado.set(atividade.tipo);
+      this.seletorHuAberto.set(false);
       this.formularioAtividade.patchValue({
         tipo: atividade.tipo,
         atividadePaiId: atividade.atividadePaiId ?? '',
@@ -308,6 +388,7 @@ export class FormularioAtividadeComponent {
         responsavel: atividade.responsavel,
         prazo: atividade.prazo,
       });
+      this.sincronizarTextoHistoriaUsuario(atividade.atividadePaiId ?? '');
       this.atualizarValidacaoVinculoHu(atividade.tipo);
     });
   }
@@ -341,12 +422,56 @@ export class FormularioAtividadeComponent {
 
   alterarTipo(evento: Event): void {
     const tipo = (evento.target as HTMLSelectElement).value as TipoAtividade;
-    this.tipoSelecionado.set(tipo);
-    this.atualizarValidacaoVinculoHu(tipo);
+    this.selecionarTipo(tipo);
+  }
 
-    if (tipo === TipoAtividade.HU) {
+  selecionarTipo(tipo: string): void {
+    const tipoAtividade = tipo as TipoAtividade;
+    this.tipoSelecionado.set(tipoAtividade);
+    this.formularioAtividade.controls.tipo.setValue(tipoAtividade);
+    this.atualizarValidacaoVinculoHu(tipoAtividade);
+
+    if (tipoAtividade === TipoAtividade.HU) {
       this.formularioAtividade.controls.atividadePaiId.setValue('');
     }
+
+    this.sincronizarTextoHistoriaUsuario(this.formularioAtividade.controls.atividadePaiId.value ?? '');
+    this.seletorHuAberto.set(false);
+  }
+
+  filtrarHistoriaUsuario(texto: string): void {
+    this.filtroHistoriaUsuario.set(texto);
+    this.seletorHuAberto.set(true);
+  }
+
+  abrirSeletorHu(): void {
+    if (this.opcoesHistoriaUsuario().length === 0) {
+      return;
+    }
+
+    this.seletorHuAberto.set(true);
+  }
+
+  alternarSeletorHu(): void {
+    if (this.seletorHuAberto()) {
+      this.seletorHuAberto.set(false);
+      this.sincronizarTextoHistoriaUsuario(this.formularioAtividade.controls.atividadePaiId.value ?? '');
+      return;
+    }
+
+    this.abrirSeletorHu();
+  }
+
+  selecionarHistoriaUsuario(opcao: OpcaoSeletorUi): void {
+    this.formularioAtividade.controls.atividadePaiId.setValue(opcao.valor);
+    this.filtroHistoriaUsuario.set(opcao.rotulo);
+    this.seletorHuAberto.set(false);
+  }
+
+  limparHistoriaUsuarioSelecionada(): void {
+    this.formularioAtividade.controls.atividadePaiId.setValue('');
+    this.filtroHistoriaUsuario.set('');
+    this.seletorHuAberto.set(false);
   }
 
   textoTipoAtividade(tipo: TipoAtividade): string {
@@ -412,6 +537,26 @@ export class FormularioAtividadeComponent {
     }
 
     controle.updateValueAndValidity();
+  }
+
+  private sincronizarTextoHistoriaUsuario(atividadePaiId: string): void {
+    if (!atividadePaiId) {
+      this.filtroHistoriaUsuario.set('');
+      return;
+    }
+
+    const opcaoSelecionada = this.opcoesHistoriaUsuario().find((opcao) => opcao.valor === atividadePaiId);
+    this.filtroHistoriaUsuario.set(opcaoSelecionada?.rotulo ?? '');
+  }
+
+  @HostListener('document:click')
+  aoClicarFora(): void {
+    if (!this.seletorHuAberto()) {
+      return;
+    }
+
+    this.seletorHuAberto.set(false);
+    this.sincronizarTextoHistoriaUsuario(this.formularioAtividade.controls.atividadePaiId.value ?? '');
   }
 
   private historiaUsuarioEhCompativel(atividade: Atividade, tipo: TipoAtividade): boolean {

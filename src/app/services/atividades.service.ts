@@ -175,9 +175,11 @@ export class AtividadesService {
       })
       .subscribe({
         next: () => {
-          this.reordenarAtividadesRaiaNaApi(atividadeAtual.raiaId, atividadesOrigem);
-          this.reordenarAtividadesRaiaNaApi(atividadeMovida.raiaId, [...atividadesDestino, atividadeMovida]);
-          this.carregarHistoricoAtividade(atividadeMovida.id);
+          this.reordenarAtividadesRaiaNaApi(atividadeAtual.raiaId, atividadesOrigem, () => {
+            this.reordenarAtividadesRaiaNaApi(atividadeMovida.raiaId, [...atividadesDestino, atividadeMovida], () => {
+              this.carregarHistoricoAtividade(atividadeMovida.id);
+            });
+          });
         },
         error: (erro) => {
           this.carregarAtividades();
@@ -391,7 +393,7 @@ export class AtividadesService {
       });
   }
 
-  private reordenarAtividadesRaiaNaApi(raiaId: string, atividadesRaia: Atividade[]): void {
+  private reordenarAtividadesRaiaNaApi(raiaId: string, atividadesRaia: Atividade[], aoConcluir?: () => void): void {
     this.http
       .put<Atividade[]>(`${apiUrlBase}/raias/${raiaId}/atividades/reordenar`, {
         atividades: atividadesRaia.map((atividade) => ({ id: atividade.id })),
@@ -403,6 +405,7 @@ export class AtividadesService {
             const outrasAtividades = listaAtual.filter((atividade) => !idsRaia.has(atividade.id));
             return [...outrasAtividades, ...atividadesRaiaApi.map((atividade) => this.normalizarAtividade(atividade))];
           });
+          aoConcluir?.();
         },
         error: (erro) => {
           console.error('Falha ao reordenar atividades da raia na API.', erro);
